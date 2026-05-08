@@ -1,0 +1,14 @@
+.app-sidebar__user-avatar{
+    width: 48px;
+    background: rgb(144, 164, 166);
+    padding: 6px;
+}
+
+.headerRegister{
+    background: #009688;
+    color: #fff;
+}
+.headerUpdate{
+    background: #007bff;
+    color: #FFF;
+}
