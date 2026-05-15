@@ -37,6 +37,21 @@ class Roles extends Controllers
         die();
     }
 
+    public function getrol(int $idrol)
+    {
+        $intIdrol = intval(strClean($idrol));
+        if ($intIdrol > 0) {
+            $arrData = $this->model->selectRol($intIdrol);
+            if (empty($arrData)) {
+                $arrResponse = array('status' => false, 'msg' => 'Datos no encontrados.');
+            } else {
+                $arrResponse = array('status' => true, 'data' => $arrData);
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
+
     public function setRol()
     {
         $strRol = strClean($_POST['txtNombre']);
