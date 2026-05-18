@@ -54,13 +54,29 @@ class Roles extends Controllers
 
     public function setRol()
     {
+        $intIdrol = intval($_POST['idRol']);
         $strRol = strClean($_POST['txtNombre']);
         $strDescripcion = strClean($_POST['txtDescripcion']);
         $intStatus = intval($_POST['listStatus']);
-        $request_rol = $this->model->insertRol($strRol, $strDescripcion, $intStatus);
+        //$request_rol = $this->model->insertRol($strRol, $strDescripcion, $intStatus);
+
+        if ($intIdrol == 0) {
+            //Crear
+            $request_rol = $this->model->insertRol($strRol, $strDescripcion, $intStatus);
+            $option = 1;
+        } else {
+            //Actualizar
+            $request_rol = $this->model->updateRol($intIdrol, $strRol, $strDescripcion, $intStatus);
+            $option = 2;
+        }
 
         if ($request_rol > 0) {
-            $arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente');
+            if ($option == 1) {
+                $arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente');
+            } else {
+                $arrResponse = array('status' => true, 'msg' => 'Datos actualizados correctamente');
+            }
+            //$arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente');
         } else if ($request_rol == 'exist') {
             $arrResponse = array('status' => false, 'msg' => '¡Atención! El Rol ya existe');
         } else {

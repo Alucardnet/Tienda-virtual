@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', function(){
 
     formRol.onsubmit = function(e){
         e.preventDefault();
-    
+
+        var intIdrol = document.querySelector('#idRol').value;
         var strNombre  = document.querySelector('#txtNombre').value;
         var strDescripcion = document.querySelector('#txtDescripcion').value;
         var intstatus = document.querySelector('#listStatus').value;
