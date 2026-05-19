@@ -183,4 +183,73 @@ function fntEditRol() {
 // Ejecuta la función una sola vez al cargar el documento
 document.addEventListener('DOMContentLoaded', function() {
     fntEditRol();
+    fntDelRol();
 });
+
+function fntDelRol() {
+    // 1. Delegación de eventos en el documento (funciona siempre, incluso tras recargar)
+    document.addEventListener('click', function(e) {
+        
+        const btnDelRol = e.target.closest(".btnDelRol");
+        
+        if (btnDelRol) {
+            var idrol = btnDelRol.getAttribute("rl");
+
+            // 2. SweetAlert moderno (SweetAlert2) basado en Promesas
+            Swal.fire({
+                title: "Eliminar Rol",
+                text: "¿Realmente quiere eliminar el Rol?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Si, eliminar!",
+                cancelButtonText: "No, cancelar!",
+                confirmButtonColor: "#1b6341",
+                cancelButtonColor: "#d33"
+            }).then((result) => {
+                
+                // Reemplaza al antiguo 'if(isConfirm)'
+                if (result.isConfirmed) {
+                    
+                    // 3. Petición AJAX (Manteniendo XMLHttpRequest pero optimizado)
+                    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+                    var ajaxUrl = base_url + 'Roles/delRol/';
+                    var strData = "idrol=" + idrol;
+                    
+                    request.open("POST", ajaxUrl, true);
+                    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+                    request.send(strData);
+                    
+                    request.onreadystatechange = function() {
+                        if (request.readyState == 4 && request.status == 200) {
+                            var objData = JSON.parse(request.responseText);
+                            
+                            if (objData.status) {
+                                // Alerta de éxito moderna
+                                Swal.fire({
+                                    title: "Eliminar!",
+                                    text: objData.msg,
+                                    icon: "success",
+                                    confirmButtonColor: "#1b6341"
+                                });
+
+                                // 4. Recarga limpia de DataTables
+                                // Ya NO necesitas volver a meter las funciones aquí adentro
+                                tableRoles.api().ajax.reload();
+                                
+                            } else {
+                                // Alerta de error moderna
+                                Swal.fire({
+                                    title: "Atención!",
+                                    text: objData.msg,
+                                    icon: "error",
+                                    confirmButtonColor: "#d33"
+                                });
+                            }
+                        }
+                    };
+                    
+                }
+            });
+        }
+    });
+}

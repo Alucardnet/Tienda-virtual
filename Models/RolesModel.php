@@ -72,4 +72,24 @@ class RolesModel extends Mysql
 
         return $request;
     }
+
+    public function deleteRol(int $idrol)
+    {
+        $this->intIdrol = $idrol;
+        $sql = "SELECT * FROM persona WHERE rolid = $this->intIdrol";
+        $request = $this->select_all($sql);
+        if (empty($request)) {
+            $sql = "UPDATE rol SET status = ? WHERE idrol = $this->intIdrol";
+            $arrData = array(0);
+            $request = $this->update($sql, $arrData);
+            if ($request) {
+                $request = 'ok';
+            } else {
+                $request = 'error';
+            }
+        } else {
+            $request = 'exist';
+        }
+        return $request;
+    }
 }
