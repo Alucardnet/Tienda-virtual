@@ -184,6 +184,7 @@ function fntEditRol() {
 document.addEventListener('DOMContentLoaded', function() {
     fntEditRol();
     fntDelRol();
+    fntPermisos();
 });
 
 function fntDelRol() {
@@ -253,3 +254,27 @@ function fntDelRol() {
         }
     });
 }
+
+function fntPermisos() {
+    // 1. Delegación de eventos en el documento global
+    document.addEventListener('click', function(e) {
+        
+        // 2. Detectamos si se hizo clic en el botón de permisos (o en su icono interno)
+        const btnPermisosRol = e.target.closest(".btnPermisosRol");
+        
+        if (btnPermisosRol) {
+            // 3. Capturamos el ID del rol si lo necesitas (por si el instructor lo usa más adelante)
+            // var idrol = btnPermisosRol.getAttribute("rl"); 
+
+            // 4. Inicializar y mostrar el modal usando Vanilla JS (Bootstrap 5)
+            // Asegúrate de que tu modal tenga el ID o la clase correcta en el HTML
+            const modalElement = document.querySelector('.modalPermisos');
+            
+            if (modalElement) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+            }
+        }
+    });
+}
+
