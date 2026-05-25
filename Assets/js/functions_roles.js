@@ -256,20 +256,36 @@ function fntDelRol() {
 }
 
 function fntPermisos() {
-    // 1. Delegación de eventos en el documento global
+    // 1. Delegación de eventos en el documento global (evita que se rompa al paginar o recargar la tabla)
     document.addEventListener('click', function(e) {
         
-        // 2. Detectamos si se hizo clic en el botón de permisos (o en su icono interno)
+        // Detectamos si se hizo clic en el botón de permisos o en su icono interno
         const btnPermisosRol = e.target.closest(".btnPermisosRol");
         
         if (btnPermisosRol) {
-            // 3. Capturamos el ID del rol si lo necesitas (por si el instructor lo usa más adelante)
-            // var idrol = btnPermisosRol.getAttribute("rl"); 
+            // Capturamos el ID del rol desde el atributo "rl"
+            var idrol = btnPermisosRol.getAttribute("rl");
 
-            // 4. Inicializar y mostrar el modal usando Vanilla JS (Bootstrap 5)
-            // Asegúrate de que tu modal tenga el ID o la clase correcta en el HTML
-            const modalElement = document.querySelector('.modalPermisos');
+            // 2. Petición AJAX (Manteniendo XMLHttpRequest estructurado de forma moderna)
+            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            var ajaxUrl = base_url + '/Permisos/getPermisosRol/' + idrol;
             
+            request.open("GET", ajaxUrl, true);
+            request.send();
+
+            request.onreadystatechange = function() {
+                // Validación estándar de respuesta correcta (readyState 4 y status 200)
+                if (request.readyState == 4 && request.status == 200) {
+                    
+                    // Aquí el instructor imprime la respuesta en consola
+                    console.log(request.responseText);
+                    
+                    // Puedes colocar aquí la lógica para renderizar los permisos en el modal cuando el instructor lo enseñe
+                }
+            };
+
+            // 3. Mostrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
+            const modalElement = document.querySelector('.modalPermisos');
             if (modalElement) {
                 const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                 modal.show();
@@ -277,4 +293,3 @@ function fntPermisos() {
         }
     });
 }
-
