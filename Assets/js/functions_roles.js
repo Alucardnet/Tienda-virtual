@@ -279,6 +279,7 @@ function fntPermisos() {
                     
                     // Aquí el instructor imprime la respuesta en consola
                     console.log(request.responseText);
+                    document.querySelector('#contentAjax').innerHTML = request.responseText;
                     
                     // Puedes colocar aquí la lógica para renderizar los permisos en el modal cuando el instructor lo enseñe
                 }

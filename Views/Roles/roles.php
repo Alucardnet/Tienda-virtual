@@ -2,7 +2,8 @@
 headerAdmin($data);
 getModal('modalRoles', $data);
 ?>
-<main class="app-content">
+<div id="contentAjax"></div>
+<main class=" app-content">
     <div class="app-title">
         <div>
             <h1><i class="bi bi-person-vcard-fill"></i> <?= $data['page_title'] ?>
