@@ -40,4 +40,11 @@ class Permisos extends Controllers
         }
         die();
     }
+
+
+    public function setPermisos()
+    {
+        dep($_POST);
+        die();
+    }
 }

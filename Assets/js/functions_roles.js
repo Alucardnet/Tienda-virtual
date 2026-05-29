@@ -256,17 +256,15 @@ function fntDelRol() {
 }
 
 function fntPermisos() {
-    // 1. Delegación de eventos en el documento global (evita que se rompa al paginar o recargar la tabla)
+    // 1. Delegación de eventos global (evita fallos al paginar o recargar la tabla)
     document.addEventListener('click', function(e) {
         
-        // Detectamos si se hizo clic en el botón de permisos o en su icono interno
         const btnPermisosRol = e.target.closest(".btnPermisosRol");
         
         if (btnPermisosRol) {
-            // Capturamos el ID del rol desde el atributo "rl"
             var idrol = btnPermisosRol.getAttribute("rl");
 
-            // 2. Petición AJAX (Manteniendo XMLHttpRequest estructurado de forma moderna)
+            // 2. Petición AJAX (GET)
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url + '/Permisos/getPermisosRol/' + idrol;
             
@@ -274,23 +272,49 @@ function fntPermisos() {
             request.send();
 
             request.onreadystatechange = function() {
-                // Validación estándar de respuesta correcta (readyState 4 y status 200)
                 if (request.readyState == 4 && request.status == 200) {
                     
-                    // Aquí el instructor imprime la respuesta en consola
-                    console.log(request.responseText);
+                    // Inyectar el HTML recibido en el contenedor del modal
                     document.querySelector('#contentAjax').innerHTML = request.responseText;
                     
-                    // Puedes colocar aquí la lógica para renderizar los permisos en el modal cuando el instructor lo enseñe
+                    // 3. Mostrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
+                    const modalElement = document.querySelector('.modalPermisos');
+                    if (modalElement) {
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                        modal.show();
+                    }
+
+                    // 4. Asignar el evento submit al formulario recién cargado
+                    // Usamos una validación por si las dudas para evitar errores en consola
+                    const formPermisos = document.querySelector('#formPermisos');
+                    if (formPermisos) {
+                        formPermisos.addEventListener('submit', fntSavePermisos, false);
+                    }
                 }
             };
-
-            // 3. Mostrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
-            const modalElement = document.querySelector('.modalPermisos');
-            if (modalElement) {
-                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                modal.show();
-            }
         }
     });
+}
+
+function fntSavePermisos(event) {
+    // 1. Prevenir el comportamiento por defecto del formulario (recargar la página)
+    event.preventDefault();
+
+    // 2. Configuración de la petición AJAX (POST con FormData)
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    var ajaxUrl = base_url + '/Permisos/setPermisos';
+    
+    // Usamos directamente event.target, que hace referencia exacta al formulario que disparó el submit
+    var formData = new FormData(event.target);
+
+    request.open("POST", ajaxUrl, true);
+    request.send(formData);
+
+    // 3. Estructura preparada para cuando el instructor agregue la respuesta del servidor
+    request.onreadystatechange = function() {
+        if (request.readyState == 4 && request.status == 200) {
+            // Aquí procesarás la respuesta con SweetAlert2 cuando el instructor avance en el curso
+            console.log(request.responseText);
+        }
+    };
 }
