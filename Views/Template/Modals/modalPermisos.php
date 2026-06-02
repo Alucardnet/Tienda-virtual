@@ -26,8 +26,8 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Modulo</th>
-                                            <th>Leer</th>
-                                            <th>Escribir</th>
+                                            <th>Ver</th>
+                                            <th>Crear</th>
                                             <th>Actualizar</th>
                                             <th>Eliminar</th>
                                         </tr>
