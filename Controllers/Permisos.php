@@ -23,20 +23,25 @@ class Permisos extends Controllers
                 }
             } else {
                 for ($i = 0; $i < count($arrModulos); $i++) {
-                    $arrPermisos = array(
-                        'r' => $arrPermisoRol[$i]['r'],
-                        'w' => $arrPermisoRol[$i]['w'],
-                        'u' => $arrPermisoRol[$i]['u'],
-                        'd' => $arrPermisoRol[$i]['d']
-                    );
-                    if ($arrModulos[$i]['idmodulo'] == $arrPermisoRol[$i]['moduloid']) {
-                        $arrModulos[$i]['permisos'] = $arrPermisos;
+                    $arrPermisos = array('r' => 0, 'w' => 0, 'u' => 0, 'd' => 0); // Reset por defecto
+
+                    // Buscamos si el módulo actual tiene permisos asignados en el array de la BD
+                    foreach ($arrPermisosRol as $permiso) {
+                        if ($arrModulos[$i]['idmodulo'] == $permiso['moduloid']) {
+                            $arrPermisos = array(
+                                'r' => $permiso['r'],
+                                'w' => $permiso['w'],
+                                'u' => $permiso['u'],
+                                'd' => $permiso['d']
+                            );
+                            break; // Ya lo encontramos, salimos del foreach interno
+                        }
                     }
+                    $arrModulos[$i]['permisos'] = $arrPermisos;
                 }
             }
             $arrPermisoRol['modulos'] = $arrModulos;
             $html = getModal("modalPermisos", $arrPermisoRol);
-            //dep($arrPermisoRol);
         }
         die();
     }
@@ -44,7 +49,26 @@ class Permisos extends Controllers
 
     public function setPermisos()
     {
-        dep($_POST);
+        if ($_POST) {
+            $intIdrol = intval($_POST['idrol']);
+            $modulos = $_POST['modulos'];
+
+            $this->model->deletePermisos($intIdrol);
+            foreach ($modulos as $modulo) {
+                $idModulo = $modulo['idmodulo'];
+                $r = empty($modulo['r']) ? 0 : 1;
+                $w = empty($modulo['w']) ? 0 : 1;
+                $u = empty($modulo['u']) ? 0 : 1;
+                $d = empty($modulo['d']) ? 0 : 1;
+                $requestPermiso = $this->model->insertPermisos($intIdrol, $idModulo, $r, $w, $u, $d);
+            }
+            if ($requestPermiso > 0) {
+                $arrResponse = array('status' => true, 'msg' => 'Permisos asignados correctamente.');
+            } else {
+                $arrResponse = array('status' => false, 'msg' => 'No es posible asignar los permisos.');
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
         die();
     }
 }

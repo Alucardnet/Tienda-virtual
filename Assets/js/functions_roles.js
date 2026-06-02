@@ -297,24 +297,48 @@ function fntPermisos() {
 }
 
 function fntSavePermisos(event) {
-    // 1. Prevenir el comportamiento por defecto del formulario (recargar la página)
+    // 1. Prevenir que la página se recargue al enviar el formulario
     event.preventDefault();
 
-    // 2. Configuración de la petición AJAX (POST con FormData)
+    // 2. Configuración de la petición AJAX (POST)
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url + '/Permisos/setPermisos';
     
-    // Usamos directamente event.target, que hace referencia exacta al formulario que disparó el submit
+    // Capturamos el formulario de forma directa y limpia usando event.target
     var formData = new FormData(event.target);
 
     request.open("POST", ajaxUrl, true);
     request.send(formData);
 
-    // 3. Estructura preparada para cuando el instructor agregue la respuesta del servidor
+    // 3. Procesar la respuesta del servidor
     request.onreadystatechange = function() {
         if (request.readyState == 4 && request.status == 200) {
-            // Aquí procesarás la respuesta con SweetAlert2 cuando el instructor avance en el curso
-            console.log(request.responseText);
+            
+            // Parseamos la respuesta JSON que viene de PHP
+            var objData = JSON.parse(request.responseText);
+            
+            if (objData.status) {
+                // Alerta de éxito moderna con SweetAlert2
+                Swal.fire({
+                    title: "Permisos de usuario",
+                    text: objData.msg,
+                    icon: "success",
+                    confirmButtonColor: "#1b6341"
+                });
+                
+                // Nota: Si tu instructor decide cerrar el modal automáticamente aquí más adelante,
+                // la línea estándar de Bootstrap 5 para hacerlo será:
+                // bootstrap.Modal.getInstance(document.querySelector('.modalPermisos')).hide();
+                
+            } else {
+                // Alerta de error moderna con SweetAlert2
+                Swal.fire({
+                    title: "Error",
+                    text: objData.msg,
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            }
         }
     };
 }
