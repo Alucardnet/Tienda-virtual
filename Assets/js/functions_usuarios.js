@@ -1,3 +1,40 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializamos las funciones de escucha una sola vez de forma global
+    fntRolesUsuario();
+});
+
+// ==========================================
+// 2. FUNCIÓN: TRAER ROLES AL SELECT DEL MODAL
+// ==========================================
+function fntRolesUsuario() {
+    var ajaxUrl = base_url + '/Roles/getSelectRoles';
+    var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+    
+    request.open("GET", ajaxUrl, true);
+    request.send();
+
+    request.onreadystatechange = function() {
+        if (request.readyState == 4 && request.status == 200) {
+            const selectRol = document.querySelector('#listRolid');
+            
+            if (selectRol) {
+                selectRol.innerHTML = request.responseText;
+                selectRol.value = 1;
+
+                // INICIALIZAR EL BUSCADOR MODERNO:
+                VirtualSelect.init({
+                    ele: '#listRolid',
+                    search: true,              // Esto activa el buscador obligatorio de tu curso
+                    placeholder: 'Seleccione un rol',
+                    noOptionsFoundText: 'No se encontraron resultados'
+                });
+            }
+        }
+    };
+}
+
+
+
 function openModal() {
     // 1. Limpieza y preparación de campos del formulario
     document.querySelector('#idUsuario').value = "";

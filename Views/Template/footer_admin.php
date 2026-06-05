@@ -14,6 +14,8 @@
 <!-- Data table plugin-->
 <script type="text/javascript" src="<?= media(); ?>/js/plugins/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="<?= media(); ?>/js/plugins/dataTables.bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.39/dist/virtual-select.min.js"></script>
+<!--<script type="text/javascript" src="<?= media(); ?>/js/plugins/bootstrap-select.min.js"></script>-->
 
 <?php if ($data['page_name'] == "rol_usuario") { ?>
 

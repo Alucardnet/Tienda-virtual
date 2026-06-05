@@ -12,6 +12,8 @@
     <title><?= $data['page_tag'] ?></title>
     <!-- Main CSS-->
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/main.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/virtual-select-plugin@1.0.39/dist/virtual-select.min.css">
+    <!--<link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/bootstrap-select.min.css">-->
     <link rel="stylesheet" type="text/css" href="<?= media(); ?>/css/style.css">
     <!-- Font-icon css-->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
