@@ -1,9 +1,12 @@
 // ==========================================
 // 1. ESCUCHADORES DE INICIO (DOM READY)
 // ==========================================
+var tableUsuarios;
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar el selector de roles de forma inmediata
-    fntRolesUsuario();
+    if (typeof fntRolesUsuario === "function") {
+        fntRolesUsuario();
+    }
 
     // Capturar el formulario de usuarios de manera segura
     var formUsuario = document.querySelector("#formUsuario");
@@ -19,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
             var strEmail = document.querySelector('#txtEmail').value;
             var intTelefono = document.querySelector('#txtTelefono').value;
             var intTipousuario = document.querySelector('#listRolid').value;
-            var strPassword = document.querySelector('#txtPassword').value;
 
             // Validación 1: Campos obligatorios vacíos
             if (strIdentificacion == '' || strApellido == '' || strNombre == '' || strEmail == '' || intTelefono == '' || intTipousuario == '') {
@@ -54,10 +56,48 @@ document.addEventListener('DOMContentLoaded', function() {
             request.open("POST", ajaxUrl, true);
             request.send(formData);
 
-            // Estructura preparada para cuando el instructor añada la respuesta de éxito/error del servidor
+            // 3. Procesar la respuesta de éxito/error del servidor
             request.onreadystatechange = function() {
                 if (request.readyState == 4 && request.status == 200) {
-                    console.log(request.responseText);
+                    try {
+                        var objData = JSON.parse(request.responseText);
+                        
+                        if (objData.status) {
+                            // Cerrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
+                            const modalElement = document.querySelector('#modalFormUsuario');
+                            if (modalElement) {
+                                const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                                if (modal) modal.hide();
+                            }
+                            
+                            // Limpiar el formulario
+                            formUsuario.reset();
+                            
+                            // Alerta de éxito con SweetAlert2
+                            Swal.fire({
+                                title: "Usuarios",
+                                text: objData.msg,
+                                icon: "success",
+                                confirmButtonColor: "#1b6341"
+                            });
+                            
+                            // CORRECCIÓN: Recarga correcta para instancias estándar de DataTables
+                            if (tableUsuarios) {
+                                tableUsuarios.ajax.reload();
+                            }
+                            
+                        } else {
+                            // Alerta de error con SweetAlert2 (Aquí se mostrará el mensaje de duplicado)
+                            Swal.fire({
+                                title: "Error",
+                                text: objData.msg,
+                                icon: "error",
+                                confirmButtonColor: "#d33"
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error al procesar la respuesta JSON: ", error);
+                    }
                 }
             };
         };

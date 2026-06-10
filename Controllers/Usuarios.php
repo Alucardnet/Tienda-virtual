@@ -15,12 +15,46 @@ class Usuarios extends Controllers
         $this->views->getView($this, "usuarios", $data);
     }
 
-
     public function setUsuario()
     {
         if ($_POST) {
-            //dep($_POST);
-            echo $_POST['txtIdentificacion'];
+            if (
+                empty($_POST['txtIdentificacion']) || empty($_POST['txtNombre']) || empty($_POST['txtApellido'])
+                || empty($_POST['txtTelefono']) || empty($_POST['txtEmail']) || empty($_POST['listRolid']) || empty($_POST['listStatus'])
+            ) {
+                $arrResponse = array("status" => false, "msg" => 'Datos Incorrectos.');
+            } else {
+                $strIdentificacion = strClean($_POST['txtIdentificacion']);
+                $strNombre = ucwords(strClean($_POST['txtNombre']));
+                $strApellido = ucwords(strClean($_POST['txtApellido']));
+                $intTelefono = intval(strClean($_POST['txtTelefono']));
+                $strEmail = strtolower(strClean($_POST['txtEmail']));
+                $intTipoId = intval(strClean($_POST['listRolid']));
+                $intStatus = intval(strClean($_POST['listStatus']));
+
+                $strPassword = empty($_POST['txtPassword']) ? hash("SHA256", passGenerator()) : hash("SHA256", $_POST['txtPassword']);
+
+                $request_user = $this->model->insertUsuario(
+                    $strIdentificacion,
+                    $strNombre,
+                    $strApellido,
+                    $intTelefono,
+                    $strEmail,
+                    $strPassword,
+                    $intTipoId,
+                    $intStatus
+                );
+
+                // CORRECCIÓN CRÍTICA: Validar primero el string 'exist' de forma estricta
+                if ($request_user === 'exist') {
+                    $arrResponse = array('status' => false, 'msg' => '¡Atención! el email o la identificación ya existe, ingrese otro.');
+                } else if ($request_user > 0) {
+                    $arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente.');
+                } else {
+                    $arrResponse = array("status" => false, "msg" => 'No es posible almacenar los datos.');
+                }
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
         }
         die();
     }
