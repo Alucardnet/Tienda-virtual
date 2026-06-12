@@ -3,6 +3,34 @@
 // ==========================================
 var tableUsuarios;
 document.addEventListener('DOMContentLoaded', function() {
+
+    // OPTIMIZACIÓN: Inicializamos con DataTable() para acceder a la API directamente
+    tableUsuarios = $('#tableUsuarios').DataTable({
+        "aProcessing": true,
+        "aServerSide": true,
+        "language": {
+            "url": "//cdn.datatables.net/plug-ins/2.3.8/i18n/es-MX.json"
+        },
+        "ajax": {
+            "url": " " + base_url + "/Usuarios/getUsuarios",
+            "dataSrc": ""
+        },
+        columns: [
+            { data: 'idpersona' },
+            { data: 'nombres' },
+            { data: 'apellidos' },
+            { data: 'email_user' },
+            { data: 'telefono' },
+            { data: 'nombrerol' },
+            { data: 'status' },
+            { data: 'options' }
+        ],
+        "responsive": true,
+        "bDestroy": true,
+        "iDisplayLength": 10,
+        "order": [[0, "desc"]]
+    });
+
     // Inicializar el selector de roles de forma inmediata
     if (typeof fntRolesUsuario === "function") {
         fntRolesUsuario();
@@ -81,13 +109,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                 confirmButtonColor: "#1b6341"
                             });
                             
-                            // CORRECCIÓN: Recarga correcta para instancias estándar de DataTables
-                            if (tableUsuarios) {
-                                tableUsuarios.ajax.reload();
-                            }
+                            // SOLUCIÓN: Usamos el nombre correcto de tu variable global de usuarios
+                            tableUsuarios.ajax.reload(); 
                             
                         } else {
-                            // Alerta de error con SweetAlert2 (Aquí se mostrará el mensaje de duplicado)
+                            // Alerta de error con SweetAlert2
                             Swal.fire({
                                 title: "Error",
                                 text: objData.msg,
