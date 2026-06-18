@@ -1,21 +1,23 @@
 // ==========================================
 // 1. ESCUCHADORES DE INICIO (DOM READY)
 // ==========================================
+window.bootstrap = window.bootstrap || {};
 var tableUsuarios;
+
 document.addEventListener('DOMContentLoaded', function() {
 
-    // OPTIMIZACIÓN: Inicializamos con DataTable() para acceder a la API directamente
+    // Inicializamos DataTables
     tableUsuarios = $('#tableUsuarios').DataTable({
         "aProcessing": true,
         "aServerSide": true,
         "language": {
-            "url": "//cdn.datatables.net/plug-ins/2.3.8/i18n/es-MX.json"
+            "url": "https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-MX.json"
         },
         "ajax": {
             "url": " " + base_url + "/Usuarios/getUsuarios",
             "dataSrc": ""
         },
-        columns: [
+        "columns": [
             { data: 'idpersona' },
             { data: 'nombres' },
             { data: 'apellidos' },
@@ -25,25 +27,26 @@ document.addEventListener('DOMContentLoaded', function() {
             { data: 'status' },
             { data: 'options' }
         ],
+        // drawCallback se encarga de activar el escucha de los botones cada vez que la tabla se redibuja o cambia de página
+        "drawCallback": function(settings) {
+            fntViewUsuario();
+        },
         "responsive": true,
         "bDestroy": true,
         "iDisplayLength": 10,
         "order": [[0, "desc"]]
     });
 
-    // Inicializar el selector de roles de forma inmediata
     if (typeof fntRolesUsuario === "function") {
         fntRolesUsuario();
     }
 
-    // Capturar el formulario de usuarios de manera segura
+    // Manejo del Envío del Formulario (Guardar / Registrar Usuario)
     var formUsuario = document.querySelector("#formUsuario");
-    
     if (formUsuario) {
         formUsuario.onsubmit = function(e) {
             e.preventDefault();
-            
-            // Extracción de valores de los inputs
+           
             var strIdentificacion = document.querySelector('#txtIdentificacion').value;
             var strNombre = document.querySelector('#txtNombre').value;
             var strApellido = document.querySelector('#txtApellido').value;
@@ -51,7 +54,6 @@ document.addEventListener('DOMContentLoaded', function() {
             var intTelefono = document.querySelector('#txtTelefono').value;
             var intTipousuario = document.querySelector('#listRolid').value;
 
-            // Validación 1: Campos obligatorios vacíos
             if (strIdentificacion == '' || strApellido == '' || strNombre == '' || strEmail == '' || intTelefono == '' || intTipousuario == '') {
                 Swal.fire({
                     title: "Atención",
@@ -62,10 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // Validación 2: Verificar si existen validaciones nativas en rojo (.is-invalid)
             let elementsValid = document.getElementsByClassName("valid");
-            for (let i = 0; i < elementsValid.length; i++) { 
-                if (elementsValid[i].classList.contains('is-invalid')) { 
+            for (let i = 0; i < elementsValid.length; i++) {
+                if (elementsValid[i].classList.contains('is-invalid')) {
                     Swal.fire({
                         title: "Atención",
                         text: "Por favor verifique los campos en rojo.",
@@ -73,47 +74,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         confirmButtonColor: "#d33"
                     });
                     return false;
-                } 
-            } 
+                }
+            }
 
-            // Configuración del envío de datos por AJAX (POST)
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-            var ajaxUrl = base_url + '/Usuarios/setUsuario'; 
+            var ajaxUrl = base_url + '/Usuarios/setUsuario';
             var formData = new FormData(formUsuario);
-            
+           
             request.open("POST", ajaxUrl, true);
             request.send(formData);
 
-            // 3. Procesar la respuesta de éxito/error del servidor
             request.onreadystatechange = function() {
                 if (request.readyState == 4 && request.status == 200) {
                     try {
                         var objData = JSON.parse(request.responseText);
-                        
+                       
                         if (objData.status) {
-                            // Cerrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
                             const modalElement = document.querySelector('#modalFormUsuario');
                             if (modalElement) {
                                 const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                                 if (modal) modal.hide();
                             }
-                            
-                            // Limpiar el formulario
+                           
                             formUsuario.reset();
-                            
-                            // Alerta de éxito con SweetAlert2
+                           
                             Swal.fire({
                                 title: "Usuarios",
                                 text: objData.msg,
                                 icon: "success",
                                 confirmButtonColor: "#1b6341"
                             });
-                            
-                            // SOLUCIÓN: Usamos el nombre correcto de tu variable global de usuarios
-                            tableUsuarios.ajax.reload(); 
-                            
+                           
+                            tableUsuarios.ajax.reload();
+                           
                         } else {
-                            // Alerta de error con SweetAlert2
                             Swal.fire({
                                 title: "Error",
                                 text: objData.msg,
@@ -131,24 +125,23 @@ document.addEventListener('DOMContentLoaded', function() {
 }, false);
 
 // ==========================================
-// 2. FUNCIÓN: TRAER ROLES AL SELECT DEL MODAL
+// 2. FUNCIÓN: CARGAR ROLES EN SELECT
 // ==========================================
 function fntRolesUsuario() {
     var ajaxUrl = base_url + '/Roles/getSelectRoles';
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-    
+   
     request.open("GET", ajaxUrl, true);
     request.send();
 
     request.onreadystatechange = function() {
         if (request.readyState == 4 && request.status == 200) {
             const selectRol = document.querySelector('#listRolid');
-            
+           
             if (selectRol) {
                 selectRol.innerHTML = request.responseText;
                 selectRol.value = 1;
 
-                // Mantenemos la inicialización de tu buscador moderno sin errores
                 VirtualSelect.init({
                     ele: '#listRolid',
                     search: true,
@@ -160,24 +153,56 @@ function fntRolesUsuario() {
     };
 }
 
+// ==========================================
+// 3. FUNCIÓN: VER DETALLES DE UN USUARIO (DELEGACIÓN ASÍNCRONA)
+// ==========================================
+function fntViewUsuario() {
+    var btnViewUsuario = document.querySelectorAll(".btnViewUsuario");
+    btnViewUsuario.forEach(function(btnViewUsuario) {
+        btnViewUsuario.addEventListener('click', function() {
+            var idpersona = this.getAttribute("us");
+            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            var ajaxUrl = base_url + '/Usuarios/getUsuario/' + idpersona;
+            
+            request.open("GET", ajaxUrl, true);
+            request.send();
 
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    // Imprimimos la respuesta en consola igual que en tus pruebas
+                    console.log("Respuesta del servidor:", request.responseText);
+                    
+                    // Inyectamos temporalmente la respuesta en el campo Identificación
+                    document.querySelector("#celIdentificacion").innerHTML = request.responseText;
+                    document.querySelector("#celNombre").innerHTML = "Instructor de curso";
+                    document.querySelector("#celApellido").innerHTML = "Conexión Exitosa";
+                    
+                    // SOLUCIÓN MODERNIZADA BOOTSTRAP 5 (Reemplaza al clásico $('#modalViewUser').modal('show'))
+                    const modalElement = document.querySelector('#modalViewUser');
+                    if (modalElement) {
+                        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                        modal.show();
+                    }
+                }
+            };
+        });
+    });
+}
 
+// ==========================================
+// 4. FUNCIÓN: CONFIGURAR Y ABRIR REGISTRO NUEVO
+// ==========================================
 function openModal() {
-    // 1. Limpieza y preparación de campos del formulario
     document.querySelector('#idUsuario').value = "";
-    
-    // 2. Reseteo de clases visuales para el modo "Registrar"
+   
     document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
     document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
-    
-    // 3. Cambio de textos dinámicos
+   
     document.querySelector('#btnText').innerHTML = "Guardar";
     document.querySelector('#titleModal').innerHTML = "Nuevo Usuario";
-    
-    // 4. Resetear los inputs del formulario
+   
     document.querySelector("#formUsuario").reset();
-    
-    // 5. Mostrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
+   
     const modalElement = document.querySelector('#modalFormUsuario');
     if (modalElement) {
         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);

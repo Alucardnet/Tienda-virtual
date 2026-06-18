@@ -76,3 +76,56 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal fade" id="modalViewUser" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header header-primary">
+                <h5 class="modal-title" id="titleModal">Datos del Usuario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">Identificación:</td>
+                            <td id="celIdentificacion"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Nombres:</td>
+                            <td id="celNombre"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Apellidos:</td>
+                            <td id="celApellido"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Teléfono:</td>
+                            <td id="celTelefono"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Email (Usuario):</td>
+                            <td id="celEmail"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Tipo Usuario:</td>
+                            <td id="celTipoUsuario"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Estado:</td>
+                            <td id="celEstado"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Fecha registro:</td>
+                            <td id="celFechaRegistro"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -69,13 +69,20 @@ class Usuarios extends Controllers
                 $arrData[$i]['status'] = '<span class="me-1 badge bg-danger">Inactivo</span>';
             }
 
+            // CORREGIDO: Se eliminaron las letras "s" adicionales de las clases de los botones
             $arrData[$i]['options'] = '<div class="text-center">
-            <button class="btn btn-info btn-sm btnViewUsusario" us="' . $arrData[$i]['idpersona'] . '" title="Ver Usuario"><i class="bi bi-eye"></i></button>
-            <button class="btn btn-primary btn-sm btnEditUsusario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-danger btn-sm btnDelUsuarios" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>
-            </div>';
+        <button class="btn btn-info btn-sm btnViewUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Ver Usuario"><i class="bi bi-eye"></i></button>
+        <button class="btn btn-primary btn-sm btnEditUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>
+        <button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>
+        </div>';
         }
         echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
+        die();
+    }
+
+    public function getUsuario(int $idpersona)
+    {
+        echo $idpersona;
         die();
     }
 }
