@@ -117,7 +117,7 @@
                             <td id="celEstado"></td>
                         </tr>
                         <tr>
-                            <td class="fw-bold">Fecha registro:</td>
+                            <td class="fw-bold">Fecha de registro:</td>
                             <td id="celFechaRegistro"></td>
                         </tr>
                     </tbody>

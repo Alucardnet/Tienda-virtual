@@ -174,8 +174,8 @@ function fntViewUsuario() {
                     
                     // Inyectamos temporalmente la respuesta en el campo Identificación
                     document.querySelector("#celIdentificacion").innerHTML = request.responseText;
-                    document.querySelector("#celNombre").innerHTML = "Instructor de curso";
-                    document.querySelector("#celApellido").innerHTML = "Conexión Exitosa";
+                    document.querySelector("#celNombre").innerHTML = "Instructor de curso php";
+                    document.querySelector("#celApellido").innerHTML = "Conexión Exitosa bug resuelto";
                     
                     // SOLUCIÓN MODERNIZADA BOOTSTRAP 5 (Reemplaza al clásico $('#modalViewUser').modal('show'))
                     const modalElement = document.querySelector('#modalViewUser');
