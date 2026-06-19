@@ -82,7 +82,16 @@ class Usuarios extends Controllers
 
     public function getUsuario(int $idpersona)
     {
-        echo $idpersona;
+        $idusuario = intval($idpersona);
+        if ($idusuario > 0) {
+            $arrData = $this->model->selectUsuario($idusuario);
+            if (empty($arrData)) {
+                $arrResponse = array('status' => false, 'msg' => 'Datos no encontrados');
+            } else {
+                $arrResponse = array('status' => true, 'data' => $arrData);
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
         die();
     }
 }

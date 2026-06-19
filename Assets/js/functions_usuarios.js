@@ -154,39 +154,93 @@ function fntRolesUsuario() {
 }
 
 // ==========================================
-// 3. FUNCIÓN: VER DETALLES DE UN USUARIO (DELEGACIÓN ASÍNCRONA)
+// 3. FUNCIÓN: VER DETALLES DE UN USUARIO (ACTUALIZADA)
 // ==========================================
 function fntViewUsuario() {
-    var btnViewUsuario = document.querySelectorAll(".btnViewUsuario");
-    btnViewUsuario.forEach(function(btnViewUsuario) {
-        btnViewUsuario.addEventListener('click', function() {
-            var idpersona = this.getAttribute("us");
-            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-            var ajaxUrl = base_url + '/Usuarios/getUsuario/' + idpersona;
-            
-            request.open("GET", ajaxUrl, true);
-            request.send();
+    const tableContainer = document.querySelector('#tableUsuarios');
+    if (!tableContainer) return;
 
-            request.onreadystatechange = function() {
-                if (request.readyState == 4 && request.status == 200) {
-                    // Imprimimos la respuesta en consola igual que en tus pruebas
-                    console.log("Respuesta del servidor:", request.responseText);
+    // Desvinculamos cualquier escucha previo para evitar peticiones duplicadas
+    tableContainer.removeEventListener('click', handleTableClick);
+    tableContainer.addEventListener('click', handleTableClick);
+}
+
+// Manejador del evento Clic adaptado a la lógica del instructor pero en Bootstrap 5
+function handleTableClick(e) {
+    // Detecta el botón correcto cuidando que las clases coincidan con tu controlador PHP
+    const btn = e.target.closest('.btnViewUsuario');
+    
+    if (btn) {
+        var idpersona = btn.getAttribute("us");
+        var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+        var ajaxUrl = base_url + '/Usuarios/getUsuario/' + idpersona;
+        
+        request.open("GET", ajaxUrl, true);
+        request.send();
+
+        request.onreadystatechange = function() {
+            if (request.readyState == 4 && request.status == 200) {
+                try {
+                    // Si tu instructor todavía tiene el "echo $idpersona; die();", este bloque try/catch 
+                    // evitará que la aplicación truene y te avisará en la consola.
+                    var objData = JSON.parse(request.responseText);
+
+                    if (objData.status) {
+                        // ACTUALIZADO: Clases de Bootstrap 5 para los badges ('bg-success' / 'bg-danger')
+                        var estadoUsuario = objData.data.status == 1 ? 
+                            '<span class="badge bg-success">Activo</span>' : 
+                            '<span class="badge bg-danger">Inactivo</span>';
+
+                        // Inyección de información en las celdas del modal
+                        document.querySelector("#celIdentificacion").innerHTML = objData.data.identificacion;
+                        document.querySelector("#celNombre").innerHTML = objData.data.nombres;
+                        document.querySelector("#celApellido").innerHTML = objData.data.apellidos;
+                        
+                        // Validación por si el ID de tu tabla HTML se llama #celtelefono o #celTelefono
+                        const celTelefono = document.querySelector("#celtelefono") || document.querySelector("#celTelefono");
+                        if (celTelefono) {
+                            celTelefono.innerHTML = objData.data.telefono;
+                        } else {
+                            document.querySelector("#celTelefono").innerHTML = objData.data.telefono;
+                        }
+                        
+                        document.querySelector("#celEmail").innerHTML = objData.data.email_user;
+                        document.querySelector("#celTipoUsuario").innerHTML = objData.data.nombrerol;
+                        document.querySelector("#celEstado").innerHTML = estadoUsuario;
+                        document.querySelector("#celFechaRegistro").innerHTML = objData.data.fecharegistro; 
+
+                        // ACTUALIZADO: Sintaxis moderna de Bootstrap 5 en JS puro para abrir el modal
+                        const modalElement = document.querySelector('#modalViewUser');
+                        if (modalElement) {
+                            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                            modal.show();
+                        }
+                    } else {
+                        // ACTUALIZADO: Alerta adaptada a SweetAlert2 (Swal.fire)
+                        Swal.fire({
+                            title: "Error",
+                            text: objData.msg,
+                            icon: "error",
+                            confirmButtonColor: "#d33"
+                        });
+                    }
+                } catch (error) {
+                    // Manejo de contingencia por si el servidor aún no responde un JSON válido
+                    console.log("El controlador aún no devuelve JSON. Respuesta recibida:", request.responseText);
                     
-                    // Inyectamos temporalmente la respuesta en el campo Identificación
+                    // Comportamiento temporal para visualizar que la conexión responde el ID
                     document.querySelector("#celIdentificacion").innerHTML = request.responseText;
-                    document.querySelector("#celNombre").innerHTML = "Instructor de curso php";
-                    document.querySelector("#celApellido").innerHTML = "Conexión Exitosa bug resuelto";
+                    document.querySelector("#celNombre").innerHTML = "Esperando actualización de la base de datos...";
                     
-                    // SOLUCIÓN MODERNIZADA BOOTSTRAP 5 (Reemplaza al clásico $('#modalViewUser').modal('show'))
                     const modalElement = document.querySelector('#modalViewUser');
                     if (modalElement) {
                         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
                         modal.show();
                     }
                 }
-            };
-        });
-    });
+            }
+        };
+    }
 }
 
 // ==========================================
