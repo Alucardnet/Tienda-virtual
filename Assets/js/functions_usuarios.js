@@ -156,22 +156,29 @@ function fntRolesUsuario() {
 // ==========================================
 // 3. FUNCIÓN: VER DETALLES DE UN USUARIO (ACTUALIZADA)
 // ==========================================
+// ==========================================
+// 3. FUNCIÓN: INICIALIZAR ESCUCHAS DE LA TABLA
+// ==========================================
 function fntViewUsuario() {
     const tableContainer = document.querySelector('#tableUsuarios');
     if (!tableContainer) return;
 
-    // Desvinculamos cualquier escucha previo para evitar peticiones duplicadas
+    // Un solo escucha en la tabla maneja clics de Ver y Editar sin duplicar código
     tableContainer.removeEventListener('click', handleTableClick);
     tableContainer.addEventListener('click', handleTableClick);
 }
 
-// Manejador del evento Clic adaptado a la lógica del instructor pero en Bootstrap 5
+// ==========================================
+// 4. MANEJADOR CENTRAL DE CLICS (VER Y EDITAR)
+// ==========================================
 function handleTableClick(e) {
-    // Detecta el botón correcto cuidando que las clases coincidan con tu controlador PHP
-    const btn = e.target.closest('.btnViewUsuario');
     
-    if (btn) {
-        var idpersona = btn.getAttribute("us");
+    // ---------------------------------------------------
+    // CASO A: DETECTAR CLIC EN EL BOTÓN VER (👁️)
+    // ---------------------------------------------------
+    const btnView = e.target.closest('.btnViewUsuario');
+    if (btnView) {
+        var idpersona = btnView.getAttribute("us");
         var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
         var ajaxUrl = base_url + '/Usuarios/getUsuario/' + idpersona;
         
@@ -181,65 +188,102 @@ function handleTableClick(e) {
         request.onreadystatechange = function() {
             if (request.readyState == 4 && request.status == 200) {
                 try {
-                    // Si tu instructor todavía tiene el "echo $idpersona; die();", este bloque try/catch 
-                    // evitará que la aplicación truene y te avisará en la consola.
                     var objData = JSON.parse(request.responseText);
-
                     if (objData.status) {
-                        // ACTUALIZADO: Clases de Bootstrap 5 para los badges ('bg-success' / 'bg-danger')
                         var estadoUsuario = objData.data.status == 1 ? 
                             '<span class="badge bg-success">Activo</span>' : 
                             '<span class="badge bg-danger">Inactivo</span>';
 
-                        // Inyección de información en las celdas del modal
                         document.querySelector("#celIdentificacion").innerHTML = objData.data.identificacion;
                         document.querySelector("#celNombre").innerHTML = objData.data.nombres;
                         document.querySelector("#celApellido").innerHTML = objData.data.apellidos;
                         
-                        // Validación por si el ID de tu tabla HTML se llama #celtelefono o #celTelefono
                         const celTelefono = document.querySelector("#celtelefono") || document.querySelector("#celTelefono");
-                        if (celTelefono) {
-                            celTelefono.innerHTML = objData.data.telefono;
-                        } else {
-                            document.querySelector("#celTelefono").innerHTML = objData.data.telefono;
-                        }
+                        if (celTelefono) celTelefono.innerHTML = objData.data.telefono;
                         
                         document.querySelector("#celEmail").innerHTML = objData.data.email_user;
                         document.querySelector("#celTipoUsuario").innerHTML = objData.data.nombrerol;
                         document.querySelector("#celEstado").innerHTML = estadoUsuario;
                         document.querySelector("#celFechaRegistro").innerHTML = objData.data.fecharegistro; 
 
-                        // ACTUALIZADO: Sintaxis moderna de Bootstrap 5 en JS puro para abrir el modal
                         const modalElement = document.querySelector('#modalViewUser');
                         if (modalElement) {
-                            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                            modal.show();
+                            bootstrap.Modal.getOrCreateInstance(modalElement).show();
                         }
-                    } else {
-                        // ACTUALIZADO: Alerta adaptada a SweetAlert2 (Swal.fire)
-                        Swal.fire({
-                            title: "Error",
-                            text: objData.msg,
-                            icon: "error",
-                            confirmButtonColor: "#d33"
-                        });
                     }
                 } catch (error) {
-                    // Manejo de contingencia por si el servidor aún no responde un JSON válido
-                    console.log("El controlador aún no devuelve JSON. Respuesta recibida:", request.responseText);
-                    
-                    // Comportamiento temporal para visualizar que la conexión responde el ID
+                    // Soporte por si el controlador responde texto plano en desarrollo
                     document.querySelector("#celIdentificacion").innerHTML = request.responseText;
-                    document.querySelector("#celNombre").innerHTML = "Esperando actualización de la base de datos...";
-                    
                     const modalElement = document.querySelector('#modalViewUser');
-                    if (modalElement) {
-                        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                        modal.show();
-                    }
+                    if (modalElement) bootstrap.Modal.getOrCreateInstance(modalElement).show();
                 }
             }
         };
+        return; // Termina la ejecución para este caso
+    }
+
+    // ---------------------------------------------------
+    // CASO B: DETECTAR CLIC EN EL BOTÓN EDITAR (✏️)
+    // ---------------------------------------------------
+    const btnEdit = e.target.closest('.btnEditUsuario');
+    if (btnEdit) {
+        // Cambiamos los textos y estilos visuales del modal a modo Edición (Igual que tu instructor)
+        document.querySelector('#titleModal').innerHTML = "Actualizar Usuario";
+        document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
+        document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
+        document.querySelector('#btnText').innerHTML = "Actualizar";
+
+        var idpersona = btnEdit.getAttribute("us");
+        var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+        var ajaxUrl = base_url + '/Usuarios/getUsuario/' + idpersona;
+        
+        request.open("GET", ajaxUrl, true);
+        request.send();
+
+        request.onreadystatechange = function() {
+            if (request.readyState == 4 && request.status == 200) {
+                try {
+                    var objData = JSON.parse(request.responseText);
+
+                    if (objData.status) {
+                        // Rellenamos los inputs con los datos que vienen del servidor
+                        document.querySelector("#idUsuario").value = objData.data.idpersona;
+                        document.querySelector("#txtIdentificacion").value = objData.data.identificacion;
+                        document.querySelector("#txtNombre").value = objData.data.nombres;
+                        document.querySelector("#txtApellido").value = objData.data.apellidos;
+                        document.querySelector("#txtTelefono").value = objData.data.telefono;
+                        document.querySelector("#txtEmail").value = objData.data.email_user;
+                        
+                        // ACTUALIZACIÓN COMPATIBLE: Seteamos el valor en VirtualSelect si existe
+                        const selectRol = document.querySelector('#listRolid');
+                        if (selectRol && selectRol.setValue) {
+                            selectRol.setValue(objData.data.idrol);
+                        } else if (selectRol) {
+                            selectRol.value = objData.data.idrol;
+                        }
+
+                        // Lógica del instructor para el estado, pero adaptada a VirtualSelect
+                        const selectStatus = document.querySelector("#listStatus");
+                        if (objData.data.status == 1) {
+                            if (selectStatus && selectStatus.setValue) selectStatus.setValue(1);
+                            else if (selectStatus) selectStatus.value = 1;
+                        } else {
+                            if (selectStatus && selectStatus.setValue) selectStatus.setValue(2);
+                            else if (selectStatus) selectStatus.value = 2;
+                        }
+
+                        // ACTUALIZACIÓN BOOTSTRAP 5: Abrimos el modal de formulario
+                        const modalElement = document.querySelector('#modalFormUsuario');
+                        if (modalElement) {
+                            bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                        }
+                    }
+                } catch (error) {
+                    console.error("Error al procesar la edición o JSON inválido:", error);
+                }
+            }
+        };
+        return; // Termina la ejecución para este caso
     }
 }
 
