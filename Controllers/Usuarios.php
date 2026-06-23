@@ -24,32 +24,62 @@ class Usuarios extends Controllers
             ) {
                 $arrResponse = array("status" => false, "msg" => 'Datos Incorrectos.');
             } else {
+                $idUsuario = intval($_POST['idUsuario']);
                 $strIdentificacion = strClean($_POST['txtIdentificacion']);
                 $strNombre = ucwords(strClean($_POST['txtNombre']));
                 $strApellido = ucwords(strClean($_POST['txtApellido']));
                 $intTelefono = intval(strClean($_POST['txtTelefono']));
                 $strEmail = strtolower(strClean($_POST['txtEmail']));
-                $intTipoId = intval(strClean($_POST['listRolid']));
-                $intStatus = intval(strClean($_POST['listStatus']));
+                $intTipoId = intval($_POST['listRolid']);
+                $intStatus = intval($_POST['listStatus']);
 
-                $strPassword = empty($_POST['txtPassword']) ? hash("SHA256", passGenerator()) : hash("SHA256", $_POST['txtPassword']);
+                if ($idUsuario == 0) {
+                    // Opción 1: Crear nuevo usuario
+                    $option = 1;
+                    $strPassword = empty($_POST['txtPassword']) ? hash("SHA256", passGenerator()) : hash("SHA256", $_POST['txtPassword']);
 
-                $request_user = $this->model->insertUsuario(
-                    $strIdentificacion,
-                    $strNombre,
-                    $strApellido,
-                    $intTelefono,
-                    $strEmail,
-                    $strPassword,
-                    $intTipoId,
-                    $intStatus
-                );
+                    $request_user = $this->model->insertUsuario(
+                        $strIdentificacion,
+                        $strNombre,
+                        $strApellido,
+                        $intTelefono,
+                        $strEmail,
+                        $strPassword,
+                        $intTipoId,
+                        $intStatus
+                    );
+                } else {
+                    // Opción 2: Actualizar usuario existente
+                    $option = 2;
+                    $strPassword = "";
 
-                // CORRECCIÓN CRÍTICA: Validar primero el string 'exist' de forma estricta
+                    // Si el usuario ingresó algo en la contraseña, la encriptamos para actualizarla
+                    if (!empty($_POST['txtPassword'])) {
+                        $strPassword = hash("SHA256", $_POST['txtPassword']);
+                    }
+
+                    $request_user = $this->model->updateUsuario(
+                        $idUsuario,
+                        $strIdentificacion,
+                        $strNombre,
+                        $strApellido,
+                        $intTelefono,
+                        $strEmail,
+                        $strPassword,
+                        $intTipoId,
+                        $intStatus
+                    );
+                }
+
+                // Procesar la respuesta que regresa el Modelo
                 if ($request_user === 'exist') {
                     $arrResponse = array('status' => false, 'msg' => '¡Atención! el email o la identificación ya existe, ingrese otro.');
                 } else if ($request_user > 0) {
-                    $arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente.');
+                    if ($option == 1) {
+                        $arrResponse = array('status' => true, 'msg' => 'Datos guardados correctamente.');
+                    } else {
+                        $arrResponse = array('status' => true, 'msg' => 'Datos actualizados correctamente.');
+                    }
                 } else {
                     $arrResponse = array("status" => false, "msg" => 'No es posible almacenar los datos.');
                 }
