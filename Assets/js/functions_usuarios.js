@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             { data: 'status' },
             { data: 'options' }
         ],
-        // drawCallback se encarga de activar el escucha de los botones cada vez que la tabla se redibuja o cambia de página
+        // drawCallback activa los escuchas de los botones cada vez que la tabla cambia de página o se redibuja
         "drawCallback": function(settings) {
             fntViewUsuario();
         },
@@ -154,22 +154,19 @@ function fntRolesUsuario() {
 }
 
 // ==========================================
-// 3. FUNCIÓN: VER DETALLES DE UN USUARIO (ACTUALIZADA)
-// ==========================================
-// ==========================================
 // 3. FUNCIÓN: INICIALIZAR ESCUCHAS DE LA TABLA
 // ==========================================
 function fntViewUsuario() {
     const tableContainer = document.querySelector('#tableUsuarios');
     if (!tableContainer) return;
 
-    // Un solo escucha en la tabla maneja clics de Ver y Editar sin duplicar código
+    // Un solo escucha en la tabla maneja clics de Ver, Editar y Eliminar sin duplicar código
     tableContainer.removeEventListener('click', handleTableClick);
     tableContainer.addEventListener('click', handleTableClick);
 }
 
 // ==========================================
-// 4. MANEJADOR CENTRAL DE CLICS (VER Y EDITAR)
+// 4. MANEJADOR CENTRAL DE CLICS (VER, EDITAR Y ELIMINAR)
 // ==========================================
 function handleTableClick(e) {
     
@@ -212,14 +209,13 @@ function handleTableClick(e) {
                         }
                     }
                 } catch (error) {
-                    // Soporte por si el controlador responde texto plano en desarrollo
                     document.querySelector("#celIdentificacion").innerHTML = request.responseText;
                     const modalElement = document.querySelector('#modalViewUser');
                     if (modalElement) bootstrap.Modal.getOrCreateInstance(modalElement).show();
                 }
             }
         };
-        return; // Termina la ejecución para este caso
+        return;
     }
 
     // ---------------------------------------------------
@@ -227,7 +223,6 @@ function handleTableClick(e) {
     // ---------------------------------------------------
     const btnEdit = e.target.closest('.btnEditUsuario');
     if (btnEdit) {
-        // Cambiamos los textos y estilos visuales del modal a modo Edición (Igual que tu instructor)
         document.querySelector('#titleModal').innerHTML = "Actualizar Usuario";
         document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
         document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
@@ -246,7 +241,6 @@ function handleTableClick(e) {
                     var objData = JSON.parse(request.responseText);
 
                     if (objData.status) {
-                        // Rellenamos los inputs con los datos que vienen del servidor
                         document.querySelector("#idUsuario").value = objData.data.idpersona;
                         document.querySelector("#txtIdentificacion").value = objData.data.identificacion;
                         document.querySelector("#txtNombre").value = objData.data.nombres;
@@ -254,7 +248,6 @@ function handleTableClick(e) {
                         document.querySelector("#txtTelefono").value = objData.data.telefono;
                         document.querySelector("#txtEmail").value = objData.data.email_user;
                         
-                        // ACTUALIZACIÓN COMPATIBLE: Seteamos el valor en VirtualSelect si existe
                         const selectRol = document.querySelector('#listRolid');
                         if (selectRol && selectRol.setValue) {
                             selectRol.setValue(objData.data.idrol);
@@ -262,7 +255,6 @@ function handleTableClick(e) {
                             selectRol.value = objData.data.idrol;
                         }
 
-                        // Lógica del instructor para el estado, pero adaptada a VirtualSelect
                         const selectStatus = document.querySelector("#listStatus");
                         if (objData.data.status == 1) {
                             if (selectStatus && selectStatus.setValue) selectStatus.setValue(1);
@@ -272,7 +264,6 @@ function handleTableClick(e) {
                             else if (selectStatus) selectStatus.value = 2;
                         }
 
-                        // ACTUALIZACIÓN BOOTSTRAP 5: Abrimos el modal de formulario
                         const modalElement = document.querySelector('#modalFormUsuario');
                         if (modalElement) {
                             bootstrap.Modal.getOrCreateInstance(modalElement).show();
@@ -283,12 +274,73 @@ function handleTableClick(e) {
                 }
             }
         };
-        return; // Termina la ejecución para este caso
+        return;
+    }
+
+    // ---------------------------------------------------
+    // CASO C: DETECTAR CLIC EN EL BOTÓN ELIMINAR (🗑️) - AGREGADO Y ACTUALIZADO
+    // ---------------------------------------------------
+    const btnDel = e.target.closest('.btnDelUsuario');
+    if (btnDel) {
+        var idpersona = btnDel.getAttribute("us"); // Asegúrate que tu botón use el atributo 'us' o cámbialo por el correspondiente
+        fntDelUsuario(idpersona);
+        return;
     }
 }
 
 // ==========================================
-// 4. FUNCIÓN: CONFIGURAR Y ABRIR REGISTRO NUEVO
+// 5. FUNCIÓN: ELIMINAR USUARIO (CÓDIGO INSTRUCTOR ACTUALIZADO A SWEETALERT2)
+// ==========================================
+function fntDelUsuario(idpersona) {
+    var idUsuario = idpersona;
+
+    Swal.fire({
+        title: "Eliminar Usuario",
+        text: "¿Realmente quiere eliminar el Usuario?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Si, eliminar!",
+        cancelButtonText: "No, cancelar!",
+        confirmButtonColor: "#1b6341",
+        cancelButtonColor: "#d33"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            var ajaxUrl = base_url + '/Usuarios/delUsuario';
+            var strData = "idUsuario=" + idUsuario;
+
+            request.open("POST", ajaxUrl, true);
+            request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+            request.send(strData);
+
+            request.onreadystatechange = function() {
+                if (request.readyState == 4 && request.status == 200) {
+                    var objData = JSON.parse(request.responseText);
+                    if (objData.status) {
+                        Swal.fire({
+                            title: "Eliminar!",
+                            text: objData.msg,
+                            icon: "success",
+                            confirmButtonColor: "#1b6341"
+                        });
+                        // Recarga limpia de la tabla al estilo DataTables moderno
+                        tableUsuarios.ajax.reload();
+                    } else {
+                        Swal.fire({
+                            title: "Atención!",
+                            text: objData.msg,
+                            icon: "error",
+                            confirmButtonColor: "#d33"
+                        });
+                    }
+                }
+            };
+        }
+    });
+}
+
+// ==========================================
+// 6. FUNCIÓN: CONFIGURAR Y ABRIR REGISTRO NUEVO
 // ==========================================
 function openModal() {
     document.querySelector('#idUsuario').value = "";

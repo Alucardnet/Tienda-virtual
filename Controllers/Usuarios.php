@@ -124,4 +124,19 @@ class Usuarios extends Controllers
         }
         die();
     }
+
+    public function delUsuario()
+    {
+        if ($_POST) {
+            $intIdpersona = intval($_POST['idUsuario']);
+            $requestDelete = $this->model->deleteUsuario($intIdpersona);
+            if ($requestDelete) {
+                $arrResponse = array('status' => true, 'msg' => 'Se ha eliminado el usuario');
+            } else {
+                $arrResponse = array('status' => false, 'msg' => 'Error al eliminar el usuario');
+            }
+            echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
+        }
+        die();
+    }
 }

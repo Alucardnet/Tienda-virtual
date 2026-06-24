@@ -149,4 +149,13 @@ class UsuariosModel extends Mysql
         }
         return $request;
     }
+
+    public function deleteUsuario(int $idtipousuario)
+    {
+        $this->intIdUsuario = $idtipousuario;
+        $sql = "UPDATE persona SET status = ? WHERE idpersona = $this->intIdUsuario";
+        $arrData = array(0);
+        $request = $this->update($sql, $arrData);
+        return $request;
+    }
 }
