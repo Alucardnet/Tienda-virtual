@@ -1,186 +1,174 @@
 var tableRoles;
 document.addEventListener('DOMContentLoaded', function(){
-    tableRoles = $('#tableRoles').dataTable({
-        "aProcessing":true,
-        "aServerSide":true,
-        "language":{
-            "url":"//cdn.datatables.net/plug-ins/2.3.8/i18n/es-MX.json"
+    // CORRECCIÓN 1: Se cambió a la inicialización moderna de DataTables para evitar conflictos
+    tableRoles = $('#tableRoles').DataTable({
+        "aProcessing": true,
+        "aServerSide": true,
+        "language": {
+            // CORRECCIÓN 2: Se agregó "https:" explícito para solucionar el error de CORS (i18n loading error)
+            "url": "https://cdn.datatables.net/plug-ins/2.3.8/i18n/es-MX.json"
         },
-        "ajax":{
-            "url": " "+base_url+"/Roles/getRoles",
-
-            "dataSrc":""
+        "ajax": {
+            "url": " " + base_url + "/Roles/getRoles",
+            "dataSrc": ""
         },
-         columns: [
-        { data: 'idrol' },
-        { data: 'nombrerol' },
-        { data: 'descripcion' },
-        { data: 'status' },
-        { data: 'options' }
+        columns: [
+            { data: 'idrol' },
+            { data: 'nombrerol' },
+            { data: 'descripcion' },
+            { data: 'status' },
+            { data: 'options' }
         ],
         "responsive": true,
         "bDestroy": true,
         "iDisplayLength": 10,
-        "order":[[0,"desc"]]
+        "order": [[0, "desc"]]
     });
 
-
-    //Nuevo Rol
+    // Nuevo Rol
     var formRol = document.querySelector("#formRol");
+    if (formRol) {
+        formRol.onsubmit = function(e){
+            e.preventDefault();
 
-    formRol.onsubmit = function(e){
-        e.preventDefault();
+            var strNombre = document.querySelector('#txtNombre').value;
+            var strDescripcion = document.querySelector('#txtDescripcion').value;
+            var intstatus = document.querySelector('#listStatus').value;
 
-        var intIdrol = document.querySelector('#idRol').value;
-        var strNombre  = document.querySelector('#txtNombre').value;
-        var strDescripcion = document.querySelector('#txtDescripcion').value;
-        var intstatus = document.querySelector('#listStatus').value;
+            if (strNombre == '' || strDescripcion == '' || intstatus == '') {
+                Swal.fire({
+                    title: "Atención",
+                    text: "Todos los campos son obligatorios",
+                    icon: "error",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#1b6341",
+                });
+                return false;
+            }
 
-        if(strNombre == '' || strDescripcion == '' || intstatus == '') {
-            // Implementación de SweetAlert2
-            Swal.fire({
-                title: "Atención",
-                text: "Todos los campos son obligatorios",
-                icon: "error",
-                confirmButtonText: "Aceptar",
-                confirmButtonColor: "#1b6341",
-            });
-            return false;
-        }
+            var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
+            var ajaxUrl = base_url + 'Roles/setRol';
+            var formData = new FormData(formRol);
+            request.open("POST", ajaxUrl, true);
+            request.send(formData);
+            
+            request.onreadystatechange = function(){
+                if (request.readyState == 4 && request.status == 200) {
+                    var objData = JSON.parse(request.responseText);
 
-        // código AJAX 
-        var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
-        var ajaxUrl = base_url+'Roles/setRol';
-        var formData = new FormData(formRol);
-        request.open("POST",ajaxUrl,true);
-        request.send(formData);
-        request.onreadystatechange = function(){
-            if(request.readyState == 4 && request.status == 200){
-                var objData = JSON.parse(request.responseText);
+                    if (objData.status) {
+                        // CORRECCIÓN 3: Cierre de modal con estándar Bootstrap 5 puro (Sin jQuery)
+                        const modalElement = document.querySelector('#modalFormRol');
+                        if (modalElement) {
+                            bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+                        }
+                        
+                        formRol.reset();
+        
+                        Swal.fire({
+                            title: "Roles de usuario",
+                            text: objData.msg,
+                            icon: "success",
+                            confirmButtonColor: "#1b6341",
+                            confirmButtonText: "Aceptar" 
+                        });
 
-                if(objData.status) {
-                    // Cerrar el modal
-                    $('#modalFormRol').modal("hide");
-                    // Limpiar el formulario
-                    formRol.reset();
-    
-                    // SweetAlert2 para éxito
-                    Swal.fire({
-                        title: "Roles de usuario",
-                        text: objData.msg,
-                        icon: "success",
-                        confirmButtonColor: "#1b6341",
-                        confirmButtonText: "Aceptar" 
-                    });
+                        // CORRECCIÓN 4: Al usar .DataTable() moderno se recarga directamente con .ajax.reload()
+                        tableRoles.ajax.reload(); 
 
-                    // Recargar la tabla (corregido a .reload())
-                    tableRoles.api().ajax.reload(); 
-
-                } else {
-                    // SweetAlert2 para error
-                    Swal.fire({
-                        title: "Error",
-                        text: objData.msg,
-                        icon: "error",
-                        confirmButtonColor: "#d33",
-                        confirmButtonText: "Entendido"
-                    });
+                    } else {
+                        Swal.fire({
+                            title: "Error",
+                            text: objData.msg,
+                            icon: "error",
+                            confirmButtonColor: "#d33",
+                            confirmButtonText: "Entendido"
+                        });
+                    }
                 }
             }
-            
         }
-
     }
 });
 
-$('#tableRoles').DataTable(); 
+// CORRECCIÓN 5: SE ELIMINÓ LA LÍNEA SOLITARIA $('#tableRoles').DataTable(); QUE DUPLICABA LA TABLA
 
 function openModal(){
-
-    document.querySelector('#idRol').value="";
+    document.querySelector('#idRol').value = "";
     document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
     document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
     document.querySelector('#btnText').innerHTML = "Guardar";
     document.querySelector('#titleModal').innerHTML = "Nuevo Rol";
     document.querySelector("#formRol").reset();
 
-    $('#modalFormRol').modal('show');
+    // CORRECCIÓN 6: Apertura de modal con Vanilla JS (Bootstrap 5)
+    const modalElement = document.querySelector('#modalFormRol');
+    if (modalElement) {
+        bootstrap.Modal.getOrCreateInstance(modalElement).show();
+    }
 }
 
 function fntEditRol() {
-    // Usamos delegación de eventos sobre el cuerpo de la tabla
     const tableBody = document.querySelector('#tableRoles tbody');
 
     if (tableBody) {
         tableBody.addEventListener('click', function(e) {
-            // Buscamos si el clic ocurrió en un botón de edición o un elemento hijo
             const btnEdit = e.target.closest(".btnEditRol");
             
             if (btnEdit) {
-    // 1. Obtener el ID del rol desde el atributo personalizado 'rl' del botón
-    const idRol = btnEdit.getAttribute("rl"); 
+                const idRol = btnEdit.getAttribute("rl"); 
 
-    // Cambios visuales del modal (Bootstrap 5)
-    document.querySelector('#titleModal').innerHTML = "Actualizar Rol";
-    document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
-    document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
-    document.querySelector('#btnText').innerHTML = "Actualizar";
+                document.querySelector('#titleModal').innerHTML = "Actualizar Rol";
+                document.querySelector('.modal-header').classList.replace("headerRegister", "headerUpdate");
+                document.querySelector('#btnActionForm').classList.replace("btn-primary", "btn-info");
+                document.querySelector('#btnText').innerHTML = "Actualizar";
 
-    // 2. Instanciar el objeto XMLHttpRequest
-    const request = new XMLHttpRequest();
-    const ajaxUrl = base_url + '/Roles/getRol/' + idRol; 
+                const request = new XMLHttpRequest();
+                const ajaxUrl = base_url + '/Roles/getRol/' + idRol; 
 
-    // 3. Configurar la petición
-    request.open("GET", ajaxUrl, true);
-    
-    // 4. Definir qué hacer cuando llegue la respuesta
-    request.onreadystatechange = function() {
-        if (request.readyState == 4 && request.status == 200) {
-            const objData = JSON.parse(request.responseText);
-            
-            if (objData.status) {
-                document.querySelector("#idRol").value = objData.data.idrol;
-                document.querySelector("#txtNombre").value = objData.data.nombrerol;
-                document.querySelector("#txtDescripcion").value = objData.data.descripcion;
-
-                // CORRECCIÓN 1: Declarar la variable fuera del if/else para que tenga alcance global en este bloque
-                let optionSelect = '';
-                if (objData.data.status == 1) {
-                    optionSelect = '<option value="1" selected class="notBlock">Activo</option>';
-                } else {
-                    optionSelect = '<option value="2" selected class="notBlock">Inactivo</option>';
-                }
-
-                // CORRECCIÓN 2: Cambiar comillas simples por backticks (``) para que funcione la interpolación ${}
-                const htmlSelect = `${optionSelect}
-                                    <option value="1">Activo</option>
-                                    <option value="2">Inactivo</option>`;
-                                    
-                document.querySelector("#listStatus").innerHTML = htmlSelect;
+                request.open("GET", ajaxUrl, true);
                 
-                // CORRECCIÓN 3: Se eliminó la línea de jQuery $('#modalFormRol').modal('show') de aquí,
-                // ya que manejas la apertura del modal al final de manera estándar con Bootstrap 5.
+                request.onreadystatechange = function() {
+                    if (request.readyState == 4 && request.status == 200) {
+                        const objData = JSON.parse(request.responseText);
+                        
+                        if (objData.status) {
+                            document.querySelector("#idRol").value = objData.data.idrol;
+                            document.querySelector("#txtNombre").value = objData.data.nombrerol;
+                            document.querySelector("#txtDescripcion").value = objData.data.descripcion;
 
-            } else {
-                // CORRECCIÓN 4: Se cambió el punto por una coma
-                swal("Error", objData.msg, "error");
+                            let optionSelect = '';
+                            if (objData.data.status == 1) {
+                                optionSelect = '<option value="1" selected class="notBlock">Activo</option>';
+                            } else {
+                                optionSelect = '<option value="2" selected class="notBlock">Inactivo</option>';
+                            }
+
+                            const htmlSelect = `${optionSelect}
+                                                <option value="1">Activo</option>
+                                                <option value="2">Inactivo</option>`;
+                                                
+                            document.querySelector("#listStatus").innerHTML = htmlSelect;
+                            
+                            // CORRECCIÓN 7: El modal se abre UNICAMENTE cuando los datos ya se inyectaron de forma exitosa
+                            const modalElement = document.querySelector('#modalFormRol');
+                            if (modalElement) {
+                                bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                            }
+
+                        } else {
+                            Swal.fire("Error", objData.msg, "error");
+                        }
+                    }
+                };
+
+                request.send();
             }
-        }
-    };
-
-    // 5. Enviar la petición al servidor
-    request.send();
-
-    // Mostrar modal con Vanilla JS (Estándar de Bootstrap 5)
-    const modalElement = document.querySelector('#modalFormRol');
-    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-    modal.show();
-}
         });
     }
 }
 
-// Ejecuta la función una sola vez al cargar el documento
+// Inicialización única de escuchas al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
     fntEditRol();
     fntDelRol();
@@ -188,15 +176,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function fntDelRol() {
-    // 1. Delegación de eventos en el documento (funciona siempre, incluso tras recargar)
     document.addEventListener('click', function(e) {
-        
         const btnDelRol = e.target.closest(".btnDelRol");
         
         if (btnDelRol) {
             var idrol = btnDelRol.getAttribute("rl");
 
-            // 2. SweetAlert moderno (SweetAlert2) basado en Promesas
             Swal.fire({
                 title: "Eliminar Rol",
                 text: "¿Realmente quiere eliminar el Rol?",
@@ -207,11 +192,7 @@ function fntDelRol() {
                 confirmButtonColor: "#1b6341",
                 cancelButtonColor: "#d33"
             }).then((result) => {
-                
-                // Reemplaza al antiguo 'if(isConfirm)'
                 if (result.isConfirmed) {
-                    
-                    // 3. Petición AJAX (Manteniendo XMLHttpRequest pero optimizado)
                     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
                     var ajaxUrl = base_url + 'Roles/delRol/';
                     var strData = "idrol=" + idrol;
@@ -225,7 +206,6 @@ function fntDelRol() {
                             var objData = JSON.parse(request.responseText);
                             
                             if (objData.status) {
-                                // Alerta de éxito moderna
                                 Swal.fire({
                                     title: "Eliminar!",
                                     text: objData.msg,
@@ -233,12 +213,9 @@ function fntDelRol() {
                                     confirmButtonColor: "#1b6341"
                                 });
 
-                                // 4. Recarga limpia de DataTables
-                                // Ya NO necesitas volver a meter las funciones aquí adentro
-                                tableRoles.api().ajax.reload();
+                                tableRoles.ajax.reload();
                                 
                             } else {
-                                // Alerta de error moderna
                                 Swal.fire({
                                     title: "Atención!",
                                     text: objData.msg,
@@ -248,7 +225,6 @@ function fntDelRol() {
                             }
                         }
                     };
-                    
                 }
             });
         }
@@ -256,15 +232,12 @@ function fntDelRol() {
 }
 
 function fntPermisos() {
-    // 1. Delegación de eventos global (evita fallos al paginar o recargar la tabla)
     document.addEventListener('click', function(e) {
-        
         const btnPermisosRol = e.target.closest(".btnPermisosRol");
         
         if (btnPermisosRol) {
             var idrol = btnPermisosRol.getAttribute("rl");
 
-            // 2. Petición AJAX (GET)
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url + '/Permisos/getPermisosRol/' + idrol;
             
@@ -273,19 +246,13 @@ function fntPermisos() {
 
             request.onreadystatechange = function() {
                 if (request.readyState == 4 && request.status == 200) {
-                    
-                    // Inyectar el HTML recibido en el contenedor del modal
                     document.querySelector('#contentAjax').innerHTML = request.responseText;
                     
-                    // 3. Mostrar el modal usando Vanilla JS (Estándar de Bootstrap 5)
                     const modalElement = document.querySelector('.modalPermisos');
                     if (modalElement) {
-                        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                        modal.show();
+                        bootstrap.Modal.getOrCreateInstance(modalElement).show();
                     }
 
-                    // 4. Asignar el evento submit al formulario recién cargado
-                    // Usamos una validación por si las dudas para evitar errores en consola
                     const formPermisos = document.querySelector('#formPermisos');
                     if (formPermisos) {
                         formPermisos.addEventListener('submit', fntSavePermisos, false);
@@ -297,41 +264,27 @@ function fntPermisos() {
 }
 
 function fntSavePermisos(event) {
-    // 1. Prevenir que la página se recargue al enviar el formulario
     event.preventDefault();
 
-    // 2. Configuración de la petición AJAX (POST)
     var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
     var ajaxUrl = base_url + '/Permisos/setPermisos';
-    
-    // Capturamos el formulario de forma directa y limpia usando event.target
     var formData = new FormData(event.target);
 
     request.open("POST", ajaxUrl, true);
     request.send(formData);
 
-    // 3. Procesar la respuesta del servidor
     request.onreadystatechange = function() {
         if (request.readyState == 4 && request.status == 200) {
-            
-            // Parseamos la respuesta JSON que viene de PHP
             var objData = JSON.parse(request.responseText);
             
             if (objData.status) {
-                // Alerta de éxito moderna con SweetAlert2
                 Swal.fire({
                     title: "Permisos de usuario",
                     text: objData.msg,
                     icon: "success",
                     confirmButtonColor: "#1b6341"
                 });
-                
-                // Nota: Si tu instructor decide cerrar el modal automáticamente aquí más adelante,
-                // la línea estándar de Bootstrap 5 para hacerlo será:
-                // bootstrap.Modal.getInstance(document.querySelector('.modalPermisos')).hide();
-                
             } else {
-                // Alerta de error moderna con SweetAlert2
                 Swal.fire({
                     title: "Error",
                     text: objData.msg,
