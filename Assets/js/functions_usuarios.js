@@ -6,12 +6,26 @@ var tableUsuarios;
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Inicializamos DataTables
+    // Inicializamos DataTables (Sintaxis Moderna 2.x)
     tableUsuarios = $('#tableUsuarios').DataTable({
         "aProcessing": true,
         "aServerSide": true,
         "language": {
-            "url": "https://cdn.datatables.net/plug-ins/2.0.8/i18n/es-MX.json"
+            // Pasamos el idioma en objeto local para evitar definitivamente el error de CORS del CDN
+            "processing": "Procesando...",
+            "lengthMenu": "Mostrar _MENU_ entradas",
+            "zeroRecords": "No se encontraron resultados",
+            "emptyTable": "Ningún dato disponible en esta tabla",
+            "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "search": "Buscar:",
+            "paginate": {
+                "first": "Primero",
+                "last": "Último",
+                "next": "Siguiente",
+                "previous": "Anterior"
+            }
         },
         "ajax": {
             "url": " " + base_url + "/Usuarios/getUsuarios",
@@ -27,13 +41,47 @@ document.addEventListener('DOMContentLoaded', function() {
             { data: 'status' },
             { data: 'options' }
         ],
+        // CONFIGURACIÓN DE DISEÑO AVANZADA EN DATATABLES 2.x
+        "layout": {
+            "topStart": {
+                "pageLength": true, // Mantiene el selector de "Mostrar entradas"
+                "buttons": [
+                    {
+                        "extend": "copyHtml5",
+                        "text": "<i class='bi bi-clipboard'></i>Copiar",
+                        "titleAttr": "Copiar",
+                        "className": "btn btn-secondary"
+                    },
+                    {
+                        "extend": "excelHtml5",
+                        "text": "<i class='bi bi-file-earmark-excel'></i>Excel",
+                        "titleAttr": "Exportar a Excel",
+                        "className": "btn btn-success"
+                    },
+                    {
+                        "extend": "pdfHtml5",
+                        "text": "<i class='bi bi-file-earmark-pdf'></i>PDF",
+                        "titleAttr": "Exportar a PDF",
+                        "className": "btn btn-danger"
+                    },
+                    {
+                        "extend": "csvHtml5",
+                        "text": "<i class='bi bi-filetype-csv'></i>CSV",
+                        "titleAttr": "Exportar a CSV",
+                        "className": "btn btn-info"
+                    }
+                ]
+            },
+            "topEnd": {
+                "search": true // Mantiene la barra de búsqueda en la esquina superior derecha
+            }
+        },
         // drawCallback activa los escuchas de los botones cada vez que la tabla cambia de página o se redibuja
         "drawCallback": function(settings) {
             fntViewUsuario();
         },
         "responsive": true,
         "bDestroy": true,
-        "iDisplayLength": 10,
         "order": [[0, "desc"]]
     });
 
@@ -46,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (formUsuario) {
         formUsuario.onsubmit = function(e) {
             e.preventDefault();
-           
+            
             var strIdentificacion = document.querySelector('#txtIdentificacion').value;
             var strNombre = document.querySelector('#txtNombre').value;
             var strApellido = document.querySelector('#txtApellido').value;
@@ -80,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var request = (window.XMLHttpRequest) ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP');
             var ajaxUrl = base_url + '/Usuarios/setUsuario';
             var formData = new FormData(formUsuario);
-           
+            
             request.open("POST", ajaxUrl, true);
             request.send(formData);
 
@@ -88,25 +136,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (request.readyState == 4 && request.status == 200) {
                     try {
                         var objData = JSON.parse(request.responseText);
-                       
+                        
                         if (objData.status) {
                             const modalElement = document.querySelector('#modalFormUsuario');
                             if (modalElement) {
                                 const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
                                 if (modal) modal.hide();
                             }
-                           
+                            
                             formUsuario.reset();
-                           
+                            
                             Swal.fire({
                                 title: "Usuarios",
                                 text: objData.msg,
                                 icon: "success",
                                 confirmButtonColor: "#1b6341"
                             });
-                           
+                            
                             tableUsuarios.ajax.reload();
-                           
+                            
                         } else {
                             Swal.fire({
                                 title: "Error",
