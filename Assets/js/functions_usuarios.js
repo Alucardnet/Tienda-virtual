@@ -48,25 +48,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 "buttons": [
                     {
                         "extend": "copyHtml5",
-                        "text": "<i class='bi bi-clipboard'></i>Copiar",
+                        "text": "<i class='bi bi-clipboard'></i> Copiar",
                         "titleAttr": "Copiar",
                         "className": "btn btn-secondary"
                     },
                     {
                         "extend": "excelHtml5",
-                        "text": "<i class='bi bi-file-earmark-excel'></i>Excel",
+                        "text": "<i class='bi bi-file-earmark-excel'></i> Excel",
                         "titleAttr": "Exportar a Excel",
                         "className": "btn btn-success"
                     },
                     {
                         "extend": "pdfHtml5",
-                        "text": "<i class='bi bi-file-earmark-pdf'></i>PDF",
+                        "text": "<i class='bi bi-file-earmark-pdf'></i> PDF",
                         "titleAttr": "Exportar a PDF",
                         "className": "btn btn-danger"
                     },
                     {
                         "extend": "csvHtml5",
-                        "text": "<i class='bi bi-filetype-csv'></i>CSV",
+                        "text": "<i class='bi bi-filetype-csv'></i> CSV",
                         "titleAttr": "Exportar a CSV",
                         "className": "btn btn-info"
                     }
@@ -112,9 +112,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
+            // ====================================================================
+            // VALIDACIÓN DE CAMPOS CON ERROR (CORREGIDO: UNIFICADO SIN DUPLICADOS)
+            // ====================================================================
             let elementsValid = document.getElementsByClassName("valid");
-            for (let i = 0; i < elementsValid.length; i++) {
-                if (elementsValid[i].classList.contains('is-invalid')) {
+
+            for (let element of elementsValid) {
+                if (element.classList.contains('is-invalid')) {
                     Swal.fire({
                         title: "Atención",
                         text: "Por favor verifique los campos en rojo.",
@@ -326,18 +330,18 @@ function handleTableClick(e) {
     }
 
     // ---------------------------------------------------
-    // CASO C: DETECTAR CLIC EN EL BOTÓN ELIMINAR (🗑️) - AGREGADO Y ACTUALIZADO
+    // CASO C: DETECTAR CLIC EN EL BOTÓN ELIMINAR (🗑️)
     // ---------------------------------------------------
     const btnDel = e.target.closest('.btnDelUsuario');
     if (btnDel) {
-        var idpersona = btnDel.getAttribute("us"); // Asegúrate que tu botón use el atributo 'us' o cámbialo por el correspondiente
+        var idpersona = btnDel.getAttribute("us"); 
         fntDelUsuario(idpersona);
         return;
     }
 }
 
 // ==========================================
-// 5. FUNCIÓN: ELIMINAR USUARIO (CÓDIGO INSTRUCTOR ACTUALIZADO A SWEETALERT2)
+// 5. FUNCIÓN: ELIMINAR USUARIO
 // ==========================================
 function fntDelUsuario(idpersona) {
     var idUsuario = idpersona;
@@ -363,23 +367,26 @@ function fntDelUsuario(idpersona) {
 
             request.onreadystatechange = function() {
                 if (request.readyState == 4 && request.status == 200) {
-                    var objData = JSON.parse(request.responseText);
-                    if (objData.status) {
-                        Swal.fire({
-                            title: "Eliminar!",
-                            text: objData.msg,
-                            icon: "success",
-                            confirmButtonColor: "#1b6341"
-                        });
-                        // Recarga limpia de la tabla al estilo DataTables moderno
-                        tableUsuarios.ajax.reload();
-                    } else {
-                        Swal.fire({
-                            title: "Atención!",
-                            text: objData.msg,
-                            icon: "error",
-                            confirmButtonColor: "#d33"
-                        });
+                    try {
+                        var objData = JSON.parse(request.responseText);
+                        if (objData.status) {
+                            Swal.fire({
+                                title: "Eliminar!",
+                                text: objData.msg,
+                                icon: "success",
+                                confirmButtonColor: "#1b6341"
+                            });
+                            tableUsuarios.ajax.reload();
+                        } else {
+                            Swal.fire({
+                                title: "Atención!",
+                                text: objData.msg,
+                                icon: "error",
+                                confirmButtonColor: "#d33"
+                            });
+                        }
+                    } catch (error) {
+                        console.error("Error al procesar la respuesta de eliminación:", error);
                     }
                 }
             };

@@ -21,22 +21,22 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="txtNombre" class="form-label">Nombres</label>
-                            <input type="text" class="form-control" id="txtNombre" name="txtNombre" required="">
+                            <input type="text" class="form-control valid validText" id="txtNombre" name="txtNombre" required="">
                         </div>
                         <div class="col-md-6">
                             <label for="txtApellido" class="form-label">Apellidos</label>
-                            <input type="text" class="form-control" id="txtApellido" name="txtApellido" required="">
+                            <input type="text" class="form-control valid validText" id="txtApellido" name="txtApellido" required="">
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label for="txtTelefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="txtTelefono" name="txtTelefono" required="">
+                            <input type="text" class="form-control valid validNumber" id="txtTelefono" name="txtTelefono" required="" onkeypress="return controlTag(event);">
                         </div>
                         <div class="col-md-6">
                             <label for="txtEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="txtEmail" name="txtEmail" required="">
+                            <input type="email" class="form-control valid validEmail" id="txtEmail" name="txtEmail" required="">
                         </div>
                     </div>
 
