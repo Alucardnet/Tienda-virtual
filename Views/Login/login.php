@@ -21,7 +21,7 @@
     </section>
     <section class="login-content">
         <div class="logo">
-            <h1>Tienda Virtual</h1>
+            <h1><?= $data['page_title']; ?></h1>
         </div>
         <div class="login-box">
             <form class="login-form" name="formLogin" id="formLogin" action="#">
@@ -61,9 +61,14 @@
         </div>
     </section>
 
+    <script>
+        const base_url = "<?= base_url(); ?>";
+    </script>
+
     <script src="<?= media(); ?>/js/jquery-3.7.0.min.js"></script>
     <script src="<?= media(); ?>/js/bootstrap.min.js"></script>
     <script src="<?= media(); ?>/js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= media(); ?>/js/<?= $data['page_functions_js']; ?>"></script>
 </body>
 
