@@ -5,6 +5,9 @@ class Login extends Controllers
     public function __construct()
     {
         session_start();
+        if (isset($_SESSION['login'])) {
+            header('Location: ' . base_url() . 'dashboard');
+        }
         parent::__construct();
     }
 
