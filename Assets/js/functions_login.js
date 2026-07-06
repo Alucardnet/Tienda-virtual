@@ -76,4 +76,38 @@ document.addEventListener('DOMContentLoaded', function() {
            };
         };
     }
+
+    if (document.querySelector("#formRecetPass")) {
+    const formRecetPass = document.querySelector("#formRecetPass");
+    
+    formRecetPass.onsubmit = function(e) {
+        e.preventDefault();
+
+        const strEmail = document.querySelector("#txtEmailReset").value.trim();
+        
+        // 1. Validación de campo vacío con SweetAlert2
+        if (strEmail === "") {
+            Swal.fire({
+                title: "Por favor",
+                text: "Escribe tu correo electrónico.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
+            return false;
+        }
+
+        // 2. Petición AJAX (Modernizada y sin ActiveXObject de Internet Explorer)
+        const request = new XMLHttpRequest();
+        const ajaxUrl = `${base_url}/Login/resetPass`;
+        const formData = new FormData(formRecetPass); // ¡Corregido! Agregado 'new' para evitar errores
+
+        request.open("POST", ajaxUrl, true);
+        request.send(formData);
+
+        // 3. Captura temporal con console.log (A la espera del código de tu instructor)
+        request.onreadystatechange = function() {
+            console.log(request);
+        };
+    };
+}
 }, false);

@@ -45,7 +45,8 @@
                 </div>
             </form>
 
-            <form class="forget-form" name="formRecetPass" id="formRecetPass" action="#">
+            <!-- Form Reset pass -->
+            <form class="forget-form" name="formRecetPass" id="formRecetPass" action="">
                 <h3 class="login-head"><i class="bi bi-person-fill-lock"></i> ¿Olvidaste tu contraseña?</h3>
                 <div class="mb-3">
                     <label class="form-label">EMAIL</label>
