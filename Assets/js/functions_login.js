@@ -104,9 +104,51 @@ document.addEventListener('DOMContentLoaded', function() {
         request.open("POST", ajaxUrl, true);
         request.send(formData);
 
-        // 3. Captura temporal con console.log (A la espera del código de tu instructor)
+       // 3. Captura y procesamiento de la respuesta (Fusión con la lógica del instructor)
         request.onreadystatechange = function() {
-            console.log(request);
+            if (request.readyState !== 4) return;
+
+            if (request.status === 200) {
+                try {
+                    const objData = JSON.parse(request.responseText);
+
+                    if (objData.status) {
+                        // SweetAlert2 con Promesa para controlar la redirección al dar clic en "Aceptar"
+                        Swal.fire({
+                            title: "Éxito",
+                            text: objData.msg,
+                            icon: "success",
+                            confirmButtonText: "Aceptar",
+                            confirmButtonColor: "#1b6341",
+                            allowOutsideClick: false // Evita que se cierre dando clic afuera
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = base_url;
+                            }
+                        });
+                        
+                        formRecetPass.reset();
+                    } else {
+                        // Alerta si el correo no existe o hay un error controlado en PHP
+                        Swal.fire({
+                            title: "Atención",
+                            text: objData.msg,
+                            icon: "error",
+                            confirmButtonColor: "#d33"
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error al procesar la respuesta JSON: ", error);
+                }
+            } else {
+                // Alerta si el servidor no responde o da un estatus de error HTTP
+                Swal.fire({
+                    title: "Atención",
+                    text: "Error en el proceso. No se pudo conectar con el servidor.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            }
         };
     };
 }
