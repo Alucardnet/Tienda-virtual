@@ -39,9 +39,7 @@
                 <div class="mb-3 btn-container d-grid">
                     <button type="submit" class="btn btn-primary btn-block"><i class="bi bi-unlock me-2 fs-5"></i>REINICIAR</button>
                 </div>
-                <div class="mb-3 mt-3">
-                    <p class="semibold-text mb-0"><a href="#" data-toggle="flip"><i class="bi bi-chevron-left me-1"></i>Iniciar sesión</a></p>
-                </div>
+
             </form>
         </div>
     </section>
