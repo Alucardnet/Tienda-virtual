@@ -152,4 +152,67 @@ document.addEventListener('DOMContentLoaded', function() {
         };
     };
 }
+
+if (document.querySelector("#formCambiarPass")) {
+    const formCambiarPass = document.querySelector("#formCambiarPass");
+    
+    formCambiarPass.onsubmit = function(e) {
+        e.preventDefault();
+
+        const strPassword = document.querySelector('#txtPassword').value.trim();
+        const strPasswordConfirm = document.querySelector('#txtPasswordConfirm').value.trim();
+        const idUsuario = document.querySelector('#idUsuario').value;
+
+        // 1. Validación: Campos vacíos
+        if (strPassword === "" || strPasswordConfirm === "") {
+            Swal.fire({
+                title: "Por favor",
+                text: "Escribe la nueva contraseña.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
+            return false;
+        }
+
+        // 2. Validación: Mínimo de caracteres
+        if (strPassword.length < 5) {
+            Swal.fire({
+                title: "Atención",
+                text: "La contraseña debe de tener un mínimo de 5 caracteres.",
+                icon: "info",
+                confirmButtonColor: "#1679bb"
+            });
+            return false;
+        }
+
+        // 3. Validación: Coincidencia de contraseñas
+        if (strPassword !== strPasswordConfirm) {
+            Swal.fire({
+                title: "Atención",
+                text: "Las contraseñas no coinciden.",
+                icon: "error",
+                confirmButtonColor: "#10bd92"
+            });
+            return false;
+        }
+
+        // 4. Petición AJAX (Corregido 'window' y removido ActiveXObject obsoleto)
+        const request = new XMLHttpRequest();
+        const ajaxUrl = `${base_url}/Login/setPassword`;
+        const formData = new FormData(formCambiarPass);
+
+        request.open("POST", ajaxUrl, true);
+        request.send(formData);
+
+        // 5. Captura temporal para pruebas en consola
+        request.onreadystatechange = function() {
+            if (request.readyState !== 4) return;
+            
+            if (request.status === 200) {
+                console.log(request.responseText); // <-- Modo prueba activo
+            }
+        };
+    };
+}
+
 }, false);

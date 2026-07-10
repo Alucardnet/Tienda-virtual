@@ -103,9 +103,16 @@ class Login extends Controllers
                 $data['page_name'] = "cambiar_contrasenia";
                 $data['page_title'] = "Cambiar contraseña";
                 $data['idpersona'] = $arrResponse['idpersona'];
+                $data['page_functions_js'] = "functions_login.js";
                 $this->views->getView($this, "cambiar_password", $data);
             }
         }
+        die();
+    }
+
+    public function setPassword()
+    {
+        dep($_POST);
         die();
     }
 }
