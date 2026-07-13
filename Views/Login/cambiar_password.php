@@ -26,8 +26,14 @@
         <div class="login-box flipped">
             <!-- Form Reset pass -->
             <form class="forget-form" name="formCambiarPass" id="formCambiarPass" action="">
-                <input type="hidden" name="idUsuario" id="idUsuario" value="<?= $data['idpersona']; ?> required">
+
+                <!-- ¡CORREGIDO! Valores limpios sin la palabra "required" incrustada dentro del texto -->
+                <input type="hidden" name="idUsuario" id="idUsuario" value="<?= $data['idpersona']; ?>">
+                <input type="hidden" name="txtEmail" id="txtEmail" value="<?= $data['email']; ?>">
+                <input type="hidden" name="txtToken" id="txtToken" value="<?= $data['token']; ?>">
+
                 <h3 class="login-head"><i class="bi bi-key-fill"></i> Cambiar contraseña</h3>
+
                 <div class="mb-3">
                     <input id="txtPassword" name="txtPassword" class="form-control" type="password" placeholder="Nueva contraseña" required>
                 </div>

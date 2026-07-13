@@ -190,13 +190,13 @@ if (document.querySelector("#formCambiarPass")) {
             Swal.fire({
                 title: "Atención",
                 text: "Las contraseñas no coinciden.",
-                icon: "error",
-                confirmButtonColor: "#10bd92"
+                icon: "info",
+                confirmButtonColor: "#1679bb"
             });
             return false;
         }
 
-        // 4. Petición AJAX (Corregido 'window' y removido ActiveXObject obsoleto)
+        // 4. Petición AJAX (Modernizada)
         const request = new XMLHttpRequest();
         const ajaxUrl = `${base_url}/Login/setPassword`;
         const formData = new FormData(formCambiarPass);
@@ -204,12 +204,50 @@ if (document.querySelector("#formCambiarPass")) {
         request.open("POST", ajaxUrl, true);
         request.send(formData);
 
-        // 5. Captura temporal para pruebas en consola
+        // 5. Captura y procesamiento de la respuesta (Fusión optimizada)
         request.onreadystatechange = function() {
             if (request.readyState !== 4) return;
             
             if (request.status === 200) {
-                console.log(request.responseText); // <-- Modo prueba activo
+                try {
+                    const objData = JSON.parse(request.responseText);
+
+                    if (objData.status) {
+                        // SweetAlert2 adaptado para redirigir al login al presionar "Iniciar sesión"
+                        Swal.fire({
+                            title: "Éxito",
+                            text: objData.msg,
+                            icon: "success",
+                            confirmButtonText: "Iniciar sesión",
+                            confirmButtonColor: "#1b6341",
+                            allowOutsideClick: false // Obliga a interactuar con el botón
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location = `${base_url}login`;
+                            }
+                        });
+                        
+                        formCambiarPass.reset();
+                    } else {
+                        // Alerta si el controlador PHP detecta un problema con el token o usuario
+                        Swal.fire({
+                            title: "Atención",
+                            text: objData.msg,
+                            icon: "error",
+                            confirmButtonColor: "#d33"
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error al procesar la respuesta JSON: ", error);
+                }
+            } else {
+                // Alerta si falla la comunicación con el servidor (HTTP != 200)
+                Swal.fire({
+                    title: "Atención",
+                    text: "Error en el proceso. No se pudo conectar con el servidor.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
             }
         };
     };

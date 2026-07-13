@@ -6,6 +6,7 @@ class LoginModel extends Mysql
     private $strUsuario;
     private $strPassword;
     private $strToken;
+
     public function __construct()
     {
         parent::__construct();
@@ -19,15 +20,13 @@ class LoginModel extends Mysql
                 email_user = '$this->strUsuario' AND
                 password = '$this->strPassword' AND
                 status != 0 ";
-        $request = $this->select($sql);;
+        $request = $this->select($sql);
         return $request;
     }
-
 
     public function sessionLogin(int $iduser)
     {
         $this->intIdUsuario = $iduser;
-        //Buscar Role
         $sql = "SELECT p.idpersona,
                        p.identificacion,
                        p.nombres,
@@ -37,7 +36,7 @@ class LoginModel extends Mysql
                        p.nit,
                        p.nombrefiscal,
                        p.direccionfiscal,
-                       r.idrol,r.nombrerol,
+                       r.idrol, r.nombrerol,
                        p.status
                 FROM persona p
                 INNER JOIN rol r
@@ -76,6 +75,16 @@ class LoginModel extends Mysql
                 token = '$this->strToken' AND
                 status = 1 ";
         $request = $this->select($sql);
+        return $request;
+    }
+
+    public function insertPassword(int $idpersona, string $password)
+    {
+        $this->intIdUsuario = $idpersona;
+        $this->strPassword = $password;
+        $sql = "UPDATE persona SET password = ?, token = ? WHERE idpersona = $this->intIdUsuario ";
+        $arrData = array($this->strPassword, "");
+        $request = $this->update($sql, $arrData);
         return $request;
     }
 }
