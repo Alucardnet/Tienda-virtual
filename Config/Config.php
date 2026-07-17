@@ -19,8 +19,16 @@ const DB_PASSWORD = "";
 const DB_CHARSET = "charset=utf8";
 
 //Delimitadores decimal y millar Ej. 24,1989.00
-const SPD = "."; 
+const SPD = ".";
 const SPM = ",";
 
 //Simbolo de moneda
 const SMONEY = "MXN";
+
+
+//Datos envio de correo
+const NOMBRE_REMITENTE = "Tienda Virtual";
+const EMAIL_REMITENTE = "no-reply@cybercube.com";
+
+const NOMBRE_EMPRESA = "CyberCube";
+const WEB_EMPRESA = "www.cybercube.com";
