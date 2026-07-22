@@ -37,21 +37,59 @@ function getModal(string $nameModal, $data)
 }
 
 //Envio de correos
+// Envio de correos mediante API con cURL (100% PHP Nativo)
 function sendEmail($data, $template)
 {
     $asunto = $data['asunto'];
     $emailDestino = $data['email'];
     $empresa = NOMBRE_REMITENTE;
     $remitente = EMAIL_REMITENTE;
-    //envio correos
-    $de = "MIME-Version: 1.0\r\n";
-    $de .= "Content-type: text/html; charset=UTF-\r\n";
-    $de .= "From: {$empresa} <{$remitente}>\r\n";
+
+    // 1. Renderizamos la plantilla HTML (mantenemos tu lógica intacta)
     ob_start();
     require_once("Views/Template/Email/" . $template . ".php");
     $mensaje = ob_get_clean();
-    $send = mail($emailDestino, $asunto, $mensaje, $de);
-    return $send;
+
+    // 2. Configuración de API Key (gratuita de Brevo / Resend)
+    $apiKey = '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';
+
+    $url = 'https://api.brevo.com/v3/smtp/email';
+
+    // 3. Estructura JSON para la API
+    $body = [
+        'sender' => [
+            'name' => $empresa,
+            'email' => $remitente
+        ],
+        'to' => [
+            ['email' => $emailDestino]
+        ],
+        'subject' => $asunto,
+        'htmlContent' => $mensaje
+    ];
+
+    // 4. Envío nativo mediante cURL (Funciona en local y en InfinityFree)
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'accept: application/json',
+        'api-key: ' . $apiKey,
+        'content-type: application/json'
+    ]);
+
+    $response = curl_exec($ch);
+    $err = curl_error($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // Retorna true si la API respondió correctamente (Código HTTP 200 o 201)
+    if ($err || ($httpCode != 200 && $httpCode != 201)) {
+        return false;
+    }
+
+    return true;
 }
 
 //Elimina exceso de espacios entre palabras
