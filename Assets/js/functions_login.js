@@ -3,18 +3,24 @@
     return false;
 });
 
-document.addEventListener('DOMContentLoaded', function() {
-    
+
+var divLoading = document.querySelector("#divLoading");
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ==========================================
+    // 1. INICIO DE SESIÓN (formLogin)
+    // ==========================================
     const formLogin = document.querySelector("#formLogin");
-    
+
     if (formLogin) {
-        formLogin.onsubmit = function(e) {
+        formLogin.addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const strEmail = document.querySelector('#txtEmail').value.trim();
             const strPassword = document.querySelector('#txtPassword').value.trim();
 
-            // 1. Validación de campos vacíos (Corregido el paréntesis extra)
+            // Validación de campos vacíos
             if (strEmail === "" || strPassword === "") {
                 Swal.fire({
                     title: "Por favor",
@@ -25,232 +31,199 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // 2. Petición AJAX (Corregido XMLHttpRequest y removido ActiveXObject obsoleto)
-            const request = new XMLHttpRequest();
-            const ajaxUrl = `${base_url}/Login/loginUser`; 
-            const formData = new FormData(formLogin);
-            
-            request.open("POST", ajaxUrl, true);
-            request.send(formData);
+            // Muestra del Loader
+            if (divLoading) divLoading.style.display = "flex";
 
-           // ==========================================
-           // 3. CAPTURA DE RESPUESTA (FUSIÓN OPTIMIZADA)
-           // ==========================================
-           request.onreadystatechange = function() {
-               // Si la petición aún no termina (readyState != 4), detenemos la ejecución
-               if (request.readyState !== 4) return;
+            try {
+                const ajaxUrl = `${base_url}login/loginUser`;
+                const formData = new FormData(formLogin);
 
-               // Si el servidor responde correctamente (HTTP 200)
-               if (request.status === 200) {
-                   try {
-                       const objData = JSON.parse(request.responseText);
-            
-                       if (objData.status) {
-                           // Redirección exitosa usando Template Literals
-                           window.location = `${base_url}/Dashboard`;
-                       } else {
-                           // Alerta con SweetAlert2 si las credenciales son incorrectas
-                           Swal.fire({
-                               title: "Atención",
-                               text: objData.msg,
-                               icon: "error",
-                               confirmButtonColor: "#d33"
-                           });
-                
-                           // Limpieza del campo de contraseña por seguridad (Detalle de tu instructor)
-                           const txtPassword = document.querySelector('#txtPassword');
-                           if (txtPassword) txtPassword.value = "";
-                       }
-                   } catch (error) {
-                       console.error("Error al procesar la respuesta JSON de login: ", error);
-                   }
-               } else {
-                   // Manejo de errores si el servidor falla (HTTP != 200)
-                   Swal.fire({
-                       title: "Atención",
-                       text: "Error en el proceso. No se pudo conectar con el servidor.",
-                       icon: "error",
-                       confirmButtonColor: "#d33"
-                   });
-               }
-           };
-        };
+                const response = await fetch(ajaxUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const objData = await response.json();
+
+                if (objData.status) {
+                    window.location = `${base_url}dashboard`;
+                } else {
+                    Swal.fire({
+                        title: "Atención",
+                        text: objData.msg,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+
+                    const txtPassword = document.querySelector('#txtPassword');
+                    if (txtPassword) txtPassword.value = "";
+                }
+            } catch (error) {
+                console.error("Error en la petición de login:", error);
+                Swal.fire({
+                    title: "Atención",
+                    text: "Error en el proceso. No se pudo conectar con el servidor.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            } finally {
+                // Se asegura de ocultar el spinner de carga al terminar
+                if (divLoading) divLoading.style.display = "none";
+            }
+        });
     }
 
-    if (document.querySelector("#formRecetPass")) {
+   // ==========================================
+    // 2. RECUPERACIÓN DE CONTRASEÑA (formRecetPass)
+    // ==========================================
     const formRecetPass = document.querySelector("#formRecetPass");
-    
-    formRecetPass.onsubmit = function(e) {
-        e.preventDefault();
 
-        const strEmail = document.querySelector("#txtEmailReset").value.trim();
-        
-        // 1. Validación de campo vacío con SweetAlert2
-        if (strEmail === "") {
-            Swal.fire({
-                title: "Por favor",
-                text: "Escribe tu correo electrónico.",
-                icon: "error",
-                confirmButtonColor: "#d33"
-            });
-            return false;
-        }
+    if (formRecetPass) {
+        formRecetPass.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        // 2. Petición AJAX (Modernizada y sin ActiveXObject de Internet Explorer)
-        const request = new XMLHttpRequest();
-        const ajaxUrl = `${base_url}/Login/resetPass`;
-        const formData = new FormData(formRecetPass); // ¡Corregido! Agregado 'new' para evitar errores
+            const strEmail = document.querySelector('#txtEmailReset').value.trim();
 
-        request.open("POST", ajaxUrl, true);
-        request.send(formData);
-
-       // 3. Captura y procesamiento de la respuesta (Fusión con la lógica del instructor)
-        request.onreadystatechange = function() {
-            if (request.readyState !== 4) return;
-
-            if (request.status === 200) {
-                try {
-                    const objData = JSON.parse(request.responseText);
-
-                    if (objData.status) {
-                        // SweetAlert2 con Promesa para controlar la redirección al dar clic en "Aceptar"
-                        Swal.fire({
-                            title: "Éxito",
-                            text: objData.msg,
-                            icon: "success",
-                            confirmButtonText: "Aceptar",
-                            confirmButtonColor: "#1b6341",
-                            allowOutsideClick: false // Evita que se cierre dando clic afuera
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location = base_url;
-                            }
-                        });
-                        
-                        formRecetPass.reset();
-                    } else {
-                        // Alerta si el correo no existe o hay un error controlado en PHP
-                        Swal.fire({
-                            title: "Atención",
-                            text: objData.msg,
-                            icon: "error",
-                            confirmButtonColor: "#d33"
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error al procesar la respuesta JSON: ", error);
-                }
-            } else {
-                // Alerta si el servidor no responde o da un estatus de error HTTP
+            if (strEmail === "") {
                 Swal.fire({
-                    title: "Atención",
-                    text: "Error en el proceso. No se pudo conectar con el servidor.",
+                    title: "Por favor",
+                    text: "Escribe tu correo electrónico.",
                     icon: "error",
                     confirmButtonColor: "#d33"
                 });
+                return false;
             }
-        };
-    };
-}
 
-if (document.querySelector("#formCambiarPass")) {
+            if (divLoading) divLoading.style.display = "flex";
+
+            try {
+                const ajaxUrl = `${base_url}login/resetPass`;
+                const formData = new FormData(formRecetPass);
+
+                const response = await fetch(ajaxUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const objData = await response.json();
+
+                if (objData.status) {
+                    Swal.fire({
+                        title: "Proceso Exitoso",
+                        text: objData.msg,
+                        icon: "success",
+                        confirmButtonColor: "#009688"
+                    }).then(() => {
+                        window.location = `${base_url}login`;
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Atención",
+                        text: objData.msg,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            } catch (error) {
+                console.error("Error en el restablecimiento de contraseña:", error);
+                Swal.fire({
+                    title: "Atención",
+                    text: "No se pudo realizar el proceso. Intenta más tarde.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            } finally {
+                if (divLoading) divLoading.style.display = "none";
+            }
+        });
+    }
+
+// ==========================================
+    // 3. CAMBIAR CONTRASEÑA (formCambiarPass)
+    // ==========================================
     const formCambiarPass = document.querySelector("#formCambiarPass");
-    
-    formCambiarPass.onsubmit = function(e) {
-        e.preventDefault();
 
-        const strPassword = document.querySelector('#txtPassword').value.trim();
-        const strPasswordConfirm = document.querySelector('#txtPasswordConfirm').value.trim();
-        const idUsuario = document.querySelector('#idUsuario').value;
+    if (formCambiarPass) {
+        formCambiarPass.addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-        // 1. Validación: Campos vacíos
-        if (strPassword === "" || strPasswordConfirm === "") {
-            Swal.fire({
-                title: "Por favor",
-                text: "Escribe la nueva contraseña.",
-                icon: "error",
-                confirmButtonColor: "#d33"
-            });
-            return false;
-        }
+            const strPassword = document.querySelector('#txtPassword').value;
+            const strPasswordConfirm = document.querySelector('#txtPasswordConfirm').value;
 
-        // 2. Validación: Mínimo de caracteres
-        if (strPassword.length < 5) {
-            Swal.fire({
-                title: "Atención",
-                text: "La contraseña debe de tener un mínimo de 5 caracteres.",
-                icon: "info",
-                confirmButtonColor: "#1679bb"
-            });
-            return false;
-        }
-
-        // 3. Validación: Coincidencia de contraseñas
-        if (strPassword !== strPasswordConfirm) {
-            Swal.fire({
-                title: "Atención",
-                text: "Las contraseñas no coinciden.",
-                icon: "info",
-                confirmButtonColor: "#1679bb"
-            });
-            return false;
-        }
-
-        // 4. Petición AJAX (Modernizada)
-        const request = new XMLHttpRequest();
-        const ajaxUrl = `${base_url}/Login/setPassword`;
-        const formData = new FormData(formCambiarPass);
-
-        request.open("POST", ajaxUrl, true);
-        request.send(formData);
-
-        // 5. Captura y procesamiento de la respuesta (Fusión optimizada)
-        request.onreadystatechange = function() {
-            if (request.readyState !== 4) return;
-            
-            if (request.status === 200) {
-                try {
-                    const objData = JSON.parse(request.responseText);
-
-                    if (objData.status) {
-                        // SweetAlert2 adaptado para redirigir al login al presionar "Iniciar sesión"
-                        Swal.fire({
-                            title: "Éxito",
-                            text: objData.msg,
-                            icon: "success",
-                            confirmButtonText: "Iniciar sesión",
-                            confirmButtonColor: "#1b6341",
-                            allowOutsideClick: false // Obliga a interactuar con el botón
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location = `${base_url}login`;
-                            }
-                        });
-                        
-                        formCambiarPass.reset();
-                    } else {
-                        // Alerta si el controlador PHP detecta un problema con el token o usuario
-                        Swal.fire({
-                            title: "Atención",
-                            text: objData.msg,
-                            icon: "error",
-                            confirmButtonColor: "#d33"
-                        });
-                    }
-                } catch (error) {
-                    console.error("Error al procesar la respuesta JSON: ", error);
-                }
-            } else {
-                // Alerta si falla la comunicación con el servidor (HTTP != 200)
+            if (strPassword === "" || strPasswordConfirm === "") {
                 Swal.fire({
-                    title: "Atención",
-                    text: "Error en el proceso. No se pudo conectar con el servidor.",
+                    title: "Por favor",
+                    text: "Escribe la nueva contraseña y confirma la información.",
                     icon: "error",
                     confirmButtonColor: "#d33"
                 });
+                return false;
             }
-        };
-    };
-}
 
-}, false);
+            if (strPassword !== strPasswordConfirm) {
+                Swal.fire({
+                    title: "Atención",
+                    text: "Las contraseñas no coinciden.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+                return false;
+            }
+
+            if (divLoading) divLoading.style.display = "flex";
+
+            try {
+                const ajaxUrl = `${base_url}login/setPassword`;
+                const formData = new FormData(formCambiarPass);
+
+                const response = await fetch(ajaxUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+
+                const objData = await response.json();
+
+                if (objData.status) {
+                    Swal.fire({
+                        title: "Éxito",
+                        text: objData.msg,
+                        icon: "success",
+                        confirmButtonColor: "#009688"
+                    }).then(() => {
+                        window.location = `${base_url}login`;
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Atención",
+                        text: objData.msg,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
+                }
+            } catch (error) {
+                console.error("Error al actualizar la contraseña:", error);
+                Swal.fire({
+                    title: "Atención",
+                    text: "Ocurrió un problema al actualizar la contraseña.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
+            } finally {
+                if (divLoading) divLoading.style.display = "none";
+            }
+        });
+    }
+
+});

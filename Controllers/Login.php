@@ -43,6 +43,7 @@ class Login extends Controllers
 
         if (empty($requestUser)) {
             $arrResponse = array('status' => false, 'msg' => 'El usuario o la contraseña es incorrecto.');
+
             echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
             die();
         }
@@ -65,6 +66,7 @@ class Login extends Controllers
         $_SESSION['userData'] = $arrData;
 
         $arrResponse = array('status' => true, 'msg' => 'ok');
+
         echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
         die();
     }
@@ -98,8 +100,7 @@ class Login extends Controllers
                     );
                     if ($requestUpdate) {
                         $sendEmail = sendEmail($dataUsuario, 'email_cambioPassword');
-                        var_dump($sendEmail);
-                        exit;
+
 
                         if ($sendEmail) {
                             $arrResponse = array(
@@ -120,6 +121,7 @@ class Login extends Controllers
                     }
                 }
             }
+
             echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
         }
         die();
@@ -203,7 +205,6 @@ class Login extends Controllers
         } else {
             $arrResponse = array('status' => false, 'msg' => 'No es posible realizar el proceso, intente más tarde.');
         }
-
         echo json_encode($arrResponse, JSON_UNESCAPED_UNICODE);
         die();
     }

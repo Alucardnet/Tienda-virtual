@@ -24,6 +24,13 @@
             <h1><?= $data['page_title']; ?></h1>
         </div>
         <div class="login-box">
+
+        <div id="divLoading">
+            <div>
+                <img src="<?= media(); ?>/images/loading.svg" alt="Loading">
+            </div>
+        </div>
+
             <form class="login-form" name="formLogin" id="formLogin" action="#">
                 <h3 class="login-head"><i class="bi bi-person-fill"></i>INICIAR SESIÓN</h3>
                 <div class="mb-3">

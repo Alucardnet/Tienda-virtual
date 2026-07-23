@@ -24,6 +24,12 @@
             <h1><?= $data['page_title']; ?></h1>
         </div>
         <div class="login-box flipped">
+            <div id="divLoading">
+                <div>
+                    <img src="<?= media(); ?>/images/loading.svg" alt="Loading">
+                </div>
+            </div>
+
             <!-- Form Reset pass -->
             <form class="forget-form" name="formCambiarPass" id="formCambiarPass" action="">
 
