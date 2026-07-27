@@ -3,6 +3,10 @@ headerAdmin($data);
 getModal('modalUsuarios', $data);
 ?>
 <main class=" app-content">
+    <?php
+    dep($_SESSION['permisos']);
+    dep($_SESSION['permisosMod']);
+    ?>
     <div class="app-title">
         <div>
             <h1><i class="bi bi-person-vcard-fill"></i> <?= $data['page_title'] ?>
