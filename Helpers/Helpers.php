@@ -95,7 +95,7 @@ function sendEmail($data, $template)
 function getPermisos(int $idmodulo)
 {
     require_once("Models/PermisosModel.php");
-    $objPermisos = new PermisosModel;
+    $objPermisos = new PermisosModel();
     $idrol = $_SESSION['userData']['idrol'];
     $arrPermisos = $objPermisos->permisosModulo($idrol);
     $permisos = '';

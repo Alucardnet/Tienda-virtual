@@ -9,7 +9,7 @@ class Usuarios extends Controllers
         if (empty($_SESSION['login'])) {
             header('Location: ' . base_url() . 'login');
         }
-        getPermisos(27);
+        getPermisos(2);
     }
 
     public function Usuarios()
@@ -99,18 +99,30 @@ class Usuarios extends Controllers
     {
         $arrData = $this->model->selectUsuarios();
         for ($i = 0; $i < count($arrData); $i++) {
+            $btnView = '';
+            $btnEdit = '';
+            $btnDelete = '';
+
             if ($arrData[$i]['status'] == 1) {
                 $arrData[$i]['status'] = '<span class="me-1 badge bg-success">Activo</span>';
             } else {
                 $arrData[$i]['status'] = '<span class="me-1 badge bg-danger">Inactivo</span>';
             }
 
+            if ($_SESSION['permisosMod']['r']) {
+                $btnView = '<button class="btn btn-info btn-sm btnViewUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Ver Usuario"><i class="bi bi-eye"></i></button>';
+            }
+
+            if ($_SESSION['permisosMod']['u']) {
+                $btnEdit = '<button class="btn btn-primary btn-sm btnEditUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>';
+            }
+
+            if ($_SESSION['permisosMod']['d']) {
+                $btnDelete = '<button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>';
+            }
+
             // CORREGIDO: Se eliminaron las letras "s" adicionales de las clases de los botones
-            $arrData[$i]['options'] = '<div class="text-center">
-        <button class="btn btn-info btn-sm btnViewUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Ver Usuario"><i class="bi bi-eye"></i></button>
-        <button class="btn btn-primary btn-sm btnEditUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>
-        <button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>
-        </div>';
+            $arrData[$i]['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . '</div>';
         }
         echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
         die();
