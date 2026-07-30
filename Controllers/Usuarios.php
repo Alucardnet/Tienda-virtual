@@ -14,6 +14,9 @@ class Usuarios extends Controllers
 
     public function Usuarios()
     {
+        if (empty($_SESSION['permisosMod']['r'])) {
+            header("Location: " . base_url() . 'dashboard');
+        }
         $data['page_tag'] = "Usuarios";
         $data['page_title'] = "Usuarios <small>Tienda Virtual</small>";
         $data['page_name'] = "usuarios";
@@ -120,8 +123,6 @@ class Usuarios extends Controllers
             if ($_SESSION['permisosMod']['d']) {
                 $btnDelete = '<button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>';
             }
-
-            // CORREGIDO: Se eliminaron las letras "s" adicionales de las clases de los botones
             $arrData[$i]['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . '</div>';
         }
         echo json_encode($arrData, JSON_UNESCAPED_UNICODE);

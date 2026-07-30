@@ -4,15 +4,19 @@ class Roles extends Controllers
 {
     public function __construct()
     {
+        parent::__construct();
         session_start();
         if (empty($_SESSION['login'])) {
             header('Location: ' . base_url() . 'login');
         }
-        parent::__construct();
+        getPermisos(2);
     }
 
     public function Roles()
     {
+        if (empty($_SESSION['permisosMod']['r'])) {
+            header("Location: " . base_url() . 'dashboard');
+        }
         $data['page_id'] = 3;
         $data['page_tag'] = "Roles Usuario";
         $data['page_name'] = "rol_usuario";
@@ -23,6 +27,9 @@ class Roles extends Controllers
 
     public function getRoles()
     {
+        $btnView = '';
+        $btnEdit = '';
+        $btnDelete = '';
         $arrData = $this->model->selectRoles();
 
         for ($i = 0; $i < count($arrData); $i++) {
@@ -32,11 +39,18 @@ class Roles extends Controllers
                 $arrData[$i]['status'] = '<span class="me-1 badge bg-danger">Inactivo</span>';
             }
 
-            $arrData[$i]['options'] = '<div class="text-center">
-            <button class="btn btn-secondary btn-sm btnPermisosRol" rl="' . $arrData[$i]['idrol'] . '" title="Permisos"><i class="bi bi-key-fill"></i></button>
-            <button class="btn btn-primary btn-sm btnEditRol" rl="' . $arrData[$i]['idrol'] . '" title="Editar"><i class="bi bi-pencil-fill"></i></button>
-            <button class="btn btn-danger btn-sm btnDelRol" rl="' . $arrData[$i]['idrol'] . '" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
+
+
+            if ($_SESSION['permisosMod']['u']) {
+                $btnView = '<button class="btn btn-secondary btn-sm btnPermisosRol" rl="' . $arrData[$i]['idrol'] . '" title="Permisos"><i class="bi bi-key-fill"></i></button>';
+                $btnEdit = '<button class="btn btn-primary btn-sm btnEditRol" rl="' . $arrData[$i]['idrol'] . '" title="Editar"><i class="bi bi-pencil-fill"></i></button>';
+            }
+
+            if ($_SESSION['permisosMod']['d']) {
+                $btnDelete = '<button class="btn btn-danger btn-sm btnDelRol" rl="' . $arrData[$i]['idrol'] . '" title="Eliminar"><i class="bi bi-trash3-fill"></i></button>
             </div>';
+            }
+            $arrData[$i]['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . '</div>';
         }
         echo json_encode($arrData, JSON_UNESCAPED_UNICODE);
         die();
