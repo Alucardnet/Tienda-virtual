@@ -117,11 +117,24 @@ class Usuarios extends Controllers
             }
 
             if ($_SESSION['permisosMod']['u']) {
-                $btnEdit = '<button class="btn btn-primary btn-sm btnEditUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>';
+                if (($_SESSION['idUser'] == 1 and $_SESSION['userData']['idrol'] == 1) ||
+                    ($_SESSION['userData']['idrol'] == 1 and $arrData[$i]['idrol'] != 1)
+                ) {
+                    $btnEdit = '<button class="btn btn-primary btn-sm btnEditUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Editar Usuario"><i class="bi bi-pencil-fill"></i></button>';
+                } else {
+                    $btnEdit = '<button class="btn btn-secondary btn-sm" disabled ><i class="bi bi-pencil-fill"></i></button>';
+                }
             }
 
             if ($_SESSION['permisosMod']['d']) {
-                $btnDelete = '<button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>';
+                if (($_SESSION['idUser'] == 1 and $_SESSION['userData']['idrol'] == 1) ||
+                    ($_SESSION['userData']['idrol'] == 1 and $arrData[$i]['idrol'] != 1) and
+                    ($_SESSION['userData']['idpersona'] != $arrData[$i]['idpersona'])
+                ) {
+                    $btnDelete = '<button class="btn btn-danger btn-sm btnDelUsuario" us="' . $arrData[$i]['idpersona'] . '" title="Eliminar Usuario"><i class="bi bi-trash3-fill"></i></button>';
+                } else {
+                    $btnDelete = '<button class="btn btn-secondary btn-sm" disabled ><i class="bi bi-trash3-fill"></i></button>';
+                }
             }
             $arrData[$i]['options'] = '<div class="text-center">' . $btnView . ' ' . $btnEdit . ' ' . $btnDelete . '</div>';
         }
