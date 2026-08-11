@@ -49,7 +49,7 @@
 
                                 <tr>
                                     <td>Teléfono:</td>
-                                    <td"><?= $_SESSION['userData']['telefono']; ?></td>
+                                    <td><?= $_SESSION['userData']['telefono']; ?></td>
                                 </tr>
 
                                 <tr>
