@@ -6,90 +6,73 @@ var tableUsuarios;
 
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Inicializamos DataTables (Sintaxis Moderna 2.x)
-    tableUsuarios = $('#tableUsuarios').DataTable({
-        "aProcessing": true,
-        "aServerSide": true,
-        "language": {
-            // Pasamos el idioma en objeto local para evitar definitivamente el error de CORS del CDN
-            "processing": "Procesando...",
-            "lengthMenu": "Mostrar _MENU_ entradas",
-            "zeroRecords": "No se encontraron resultados",
-            "emptyTable": "Ningún dato disponible en esta tabla",
-            "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "infoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "search": "Buscar:",
-            "paginate": {
-                "first": "Primero",
-                "last": "Último",
-                "next": "Siguiente",
-                "previous": "Anterior"
-            }
-        },
-        "ajax": {
-            "url": " " + base_url + "/Usuarios/getUsuarios",
-            "dataSrc": ""
-        },
-        "columns": [
-            { data: 'idpersona' },
-            { data: 'nombres' },
-            { data: 'apellidos' },
-            { data: 'email_user' },
-            { data: 'telefono' },
-            { data: 'nombrerol' },
-            { data: 'status' },
-            { data: 'options' }
-        ],
-        // CONFIGURACIÓN DE DISEÑO AVANZADA EN DATATABLES 2.x
-        "layout": {
-            "topStart": {
-                "pageLength": true, // Mantiene el selector de "Mostrar entradas"
-                "buttons": [
-                    {
-                        "extend": "copyHtml5",
-                        "text": "<i class='bi bi-clipboard'></i> Copiar",
-                        "titleAttr": "Copiar",
-                        "className": "btn btn-secondary"
-                    },
-                    {
-                        "extend": "excelHtml5",
-                        "text": "<i class='bi bi-file-earmark-excel'></i> Excel",
-                        "titleAttr": "Exportar a Excel",
-                        "className": "btn btn-success"
-                    },
-                    {
-                        "extend": "pdfHtml5",
-                        "text": "<i class='bi bi-file-earmark-pdf'></i> PDF",
-                        "titleAttr": "Exportar a PDF",
-                        "className": "btn btn-danger"
-                    },
-                    {
-                        "extend": "csvHtml5",
-                        "text": "<i class='bi bi-filetype-csv'></i> CSV",
-                        "titleAttr": "Exportar a CSV",
-                        "className": "btn btn-info"
-                    }
-                ]
+    // ---------------------------------------------------
+    // VALIDACIÓN: Sólo inicializa DataTables si existe la tabla
+    // ---------------------------------------------------
+    if (document.querySelector('#tableUsuarios')) {
+        tableUsuarios = $('#tableUsuarios').DataTable({
+            "aProcessing": true,
+            "aServerSide": true,
+            "language": {
+                "processing": "Procesando...",
+                "lengthMenu": "Mostrar _MENU_ entradas",
+                "zeroRecords": "No se encontraron resultados",
+                "emptyTable": "Ningún dato disponible en esta tabla",
+                "info": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "infoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "infoFiltered": "(filtrado de un total de _MAX_ registros)",
+                "search": "Buscar:",
+                "paginate": {
+                    "first": "Primero",
+                    "last": "Último",
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                }
             },
-            "topEnd": {
-                "search": true // Mantiene la barra de búsqueda en la esquina superior derecha
-            }
-        },
-        // drawCallback activa los escuchas de los botones cada vez que la tabla cambia de página o se redibuja
-        "drawCallback": function(settings) {
-            fntViewUsuario();
-        },
-        "responsive": true,
-        "bDestroy": true,
-        "order": [[0, "desc"]]
-    });
+            "ajax": {
+                "url": " " + base_url + "/Usuarios/getUsuarios",
+                "dataSrc": ""
+            },
+            "columns": [
+                { data: 'idpersona' },
+                { data: 'nombres' },
+                { data: 'apellidos' },
+                { data: 'email_user' },
+                { data: 'telefono' },
+                { data: 'nombrerol' },
+                { data: 'status' },
+                { data: 'options' }
+            ],
+            "layout": {
+                "topStart": {
+                    "pageLength": true, 
+                    "buttons": [
+                        { "extend": "copyHtml5", "text": "<i class='bi bi-clipboard'></i> Copiar", "titleAttr": "Copiar", "className": "btn btn-secondary" },
+                        { "extend": "excelHtml5", "text": "<i class='bi bi-file-earmark-excel'></i> Excel", "titleAttr": "Exportar a Excel", "className": "btn btn-success" },
+                        { "extend": "pdfHtml5", "text": "<i class='bi bi-file-earmark-pdf'></i> PDF", "titleAttr": "Exportar a PDF", "className": "btn btn-danger" },
+                        { "extend": "csvHtml5", "text": "<i class='bi bi-filetype-csv'></i> CSV", "titleAttr": "Exportar a CSV", "className": "btn btn-info" }
+                    ]
+                },
+                "topEnd": {
+                    "search": true 
+                }
+            },
+            "drawCallback": function(settings) {
+                fntViewUsuario();
+            },
+            "responsive": true,
+            "bDestroy": true,
+            "order": [[0, "desc"]]
+        });
+    }
 
     if (typeof fntRolesUsuario === "function") {
         fntRolesUsuario();
     }
 
-    // Manejo del Envío del Formulario (Guardar / Registrar Usuario)
+    // ---------------------------------------------------
+    // VALIDACIÓN DEL FORMULARIO DE USUARIOS
+    // ---------------------------------------------------
     var formUsuario = document.querySelector("#formUsuario");
     if (formUsuario) {
         formUsuario.onsubmit = function(e) {
@@ -112,11 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
 
-            // ====================================================================
-            // VALIDACIÓN DE CAMPOS CON ERROR (CORREGIDO: UNIFICADO SIN DUPLICADOS)
-            // ====================================================================
             let elementsValid = document.getElementsByClassName("valid");
-
             for (let element of elementsValid) {
                 if (element.classList.contains('is-invalid')) {
                     Swal.fire({
@@ -157,7 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 confirmButtonColor: "#1b6341"
                             });
                             
-                            tableUsuarios.ajax.reload();
+                            if (tableUsuarios) {
+                                tableUsuarios.ajax.reload();
+                            }
                             
                         } else {
                             Swal.fire({
@@ -189,7 +170,8 @@ function fntRolesUsuario() {
     request.onreadystatechange = function() {
         if (request.readyState == 4 && request.status == 200) {
             const selectRol = document.querySelector('#listRolid');
-           
+            
+            // VALIDACIÓN DE EXISTENCIA: Evita el error Null al estar en la vista Perfil
             if (selectRol) {
                 selectRol.innerHTML = request.responseText;
                 selectRol.value = 1;
@@ -212,7 +194,6 @@ function fntViewUsuario() {
     const tableContainer = document.querySelector('#tableUsuarios');
     if (!tableContainer) return;
 
-    // Un solo escucha en la tabla maneja clics de Ver, Editar y Eliminar sin duplicar código
     tableContainer.removeEventListener('click', handleTableClick);
     tableContainer.addEventListener('click', handleTableClick);
 }
@@ -221,10 +202,6 @@ function fntViewUsuario() {
 // 4. MANEJADOR CENTRAL DE CLICS (VER, EDITAR Y ELIMINAR)
 // ==========================================
 function handleTableClick(e) {
-    
-    // ---------------------------------------------------
-    // CASO A: DETECTAR CLIC EN EL BOTÓN VER (👁️)
-    // ---------------------------------------------------
     const btnView = e.target.closest('.btnViewUsuario');
     if (btnView) {
         var idpersona = btnView.getAttribute("us");
@@ -261,18 +238,13 @@ function handleTableClick(e) {
                         }
                     }
                 } catch (error) {
-                    document.querySelector("#celIdentificacion").innerHTML = request.responseText;
-                    const modalElement = document.querySelector('#modalViewUser');
-                    if (modalElement) bootstrap.Modal.getOrCreateInstance(modalElement).show();
+                    console.error(error);
                 }
             }
         };
         return;
     }
 
-    // ---------------------------------------------------
-    // CASO B: DETECTAR CLIC EN EL BOTÓN EDITAR (✏️)
-    // ---------------------------------------------------
     const btnEdit = e.target.closest('.btnEditUsuario');
     if (btnEdit) {
         document.querySelector('#titleModal').innerHTML = "Actualizar Usuario";
@@ -322,16 +294,13 @@ function handleTableClick(e) {
                         }
                     }
                 } catch (error) {
-                    console.error("Error al procesar la edición o JSON inválido:", error);
+                    console.error("Error al procesar la edición:", error);
                 }
             }
         };
         return;
     }
 
-    // ---------------------------------------------------
-    // CASO C: DETECTAR CLIC EN EL BOTÓN ELIMINAR (🗑️)
-    // ---------------------------------------------------
     const btnDel = e.target.closest('.btnDelUsuario');
     if (btnDel) {
         var idpersona = btnDel.getAttribute("us"); 
@@ -376,7 +345,9 @@ function fntDelUsuario(idpersona) {
                                 icon: "success",
                                 confirmButtonColor: "#1b6341"
                             });
-                            tableUsuarios.ajax.reload();
+                            if (tableUsuarios) {
+                                tableUsuarios.ajax.reload();
+                            }
                         } else {
                             Swal.fire({
                                 title: "Atención!",
@@ -386,7 +357,7 @@ function fntDelUsuario(idpersona) {
                             });
                         }
                     } catch (error) {
-                        console.error("Error al procesar la respuesta de eliminación:", error);
+                        console.error("Error al eliminar usuario:", error);
                     }
                 }
             };
@@ -398,19 +369,43 @@ function fntDelUsuario(idpersona) {
 // 6. FUNCIÓN: CONFIGURAR Y ABRIR REGISTRO NUEVO
 // ==========================================
 function openModal() {
-    document.querySelector('#idUsuario').value = "";
+    const idUsuario = document.querySelector('#idUsuario');
+    if(idUsuario) idUsuario.value = "";
    
-    document.querySelector('.modal-header').classList.replace("headerUpdate", "headerRegister");
-    document.querySelector('#btnActionForm').classList.replace("btn-info", "btn-primary");
+    const header = document.querySelector('.modal-header');
+    if(header) header.classList.replace("headerUpdate", "headerRegister");
+    
+    const btnAction = document.querySelector('#btnActionForm');
+    if(btnAction) btnAction.classList.replace("btn-info", "btn-primary");
    
-    document.querySelector('#btnText').innerHTML = "Guardar";
-    document.querySelector('#titleModal').innerHTML = "Nuevo Usuario";
+    const btnText = document.querySelector('#btnText');
+    if(btnText) btnText.innerHTML = "Guardar";
+    
+    const titleModal = document.querySelector('#titleModal');
+    if(titleModal) titleModal.innerHTML = "Nuevo Usuario";
    
-    document.querySelector("#formUsuario").reset();
+    const formUsuario = document.querySelector("#formUsuario");
+    if(formUsuario) formUsuario.reset();
    
     const modalElement = document.querySelector('#modalFormUsuario');
     if (modalElement) {
         const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
         modal.show();
+    }
+}
+
+// ==========================================
+// 7. FUNCIÓN: ABRIR MODAL PERFIL (Actualizado)
+// ==========================================
+function openModalPerfil() {
+    // Busca el ID exacto que usa tu instructor para el modal de perfil
+    const modalElement = document.querySelector('#modalFormPerfil');
+    
+    if (modalElement) {
+        // Usa la sintaxis nativa de Bootstrap 5
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.show();
+    } else {
+        console.warn("No se encontró el elemento #modalFormPerfil en el DOM.");
     }
 }
